@@ -741,7 +741,7 @@ Detail: `slide_cost_latency.md`.
 
 ### 10.5 Break-even TCO analysis — cloud vs local
 
-![TCO break-even curve](newgenes-export-assets/chart_tco.png)
+![TCO break-even curve](assets/chart_tco.png)
 
 Total annual cost vs. circuits generated per year, log-log axes, 3-year capex amortization, $0.15/kWh power cost.
 
@@ -755,11 +755,11 @@ Total annual cost vs. circuits generated per year, log-log axes, 3-year capex am
 
 Typical biotech lab volume (50–500 circuits/week = 2.5k–25k/yr) falls inside the Jetson-wins region.
 
-Script: `plot_tco.py`. Chart: `newgenes-export-assets/chart_tco.png`.
+Script: `plot_tco.py`. Chart: `assets/chart_tco.png`.
 
 ### 10.6 Points-per-watt efficiency
 
-![Efficiency bar chart — pts/W](newgenes-export-assets/chart_efficiency.png)
+![Efficiency bar chart — pts/W](assets/chart_efficiency.png)
 
 Three-panel figure: Quality · Power · Efficiency (score/W, horizontal bars).
 
@@ -774,7 +774,7 @@ Three-panel figure: Quality · Power · Efficiency (score/W, horizontal bars).
 
 (Cloud wattage is a per-request datacenter allocation estimate, not measured. Jetson = sustained measured; Mac = peak-during-inference powermetrics.)
 
-Script: `plot_efficiency.py`. Chart: `newgenes-export-assets/chart_efficiency.png`.
+Script: `plot_efficiency.py`. Chart: `assets/chart_efficiency.png`.
 
 ### 10.7 Generated circuit renders (LoRA output, d5 prompts)
 
@@ -782,19 +782,19 @@ All three rendered automatically from the Jetson LoRA model's JSON output by `re
 
 **CRISPRi inverter — score 94/100**
 
-![CRISPRi inverter](newgenes-export-assets/circuit_crispri_inverter.png)
+![CRISPRi inverter](assets/circuit_crispri_inverter.png)
 
 Prompt: *CRISPRi inverter — constitutive dCas9 with sgRNA targeting pTarget drives GFP OFF when sgRNA is induced.*
 
 **AHL quorum-sensing consensus — score 93/100**
 
-![QS consensus](newgenes-export-assets/circuit_qs_consensus.png)
+![QS consensus](assets/circuit_qs_consensus.png)
 
 Same prompt where the bare model scored **0** (§10.3). LoRA produces a clean `luxr_cds → p_lux → luxi_cds → p_lux` positive-feedback loop with GFP readout.
 
 **Tumor-targeting Nissle circuit — score 93/100**
 
-![Tumor targeting](newgenes-export-assets/circuit_tumor_targeting.png)
+![Tumor targeting](assets/circuit_tumor_targeting.png)
 
 Prompt: *Engineer a tumor-targeting E. coli Nissle circuit: hypoxia-responsive FNR promoter drives InvA; constitutive anti-HER2 nanobody surface-displayed via INP anchor.*
 
@@ -837,7 +837,7 @@ Each is one presentation slide in prose form; copy-paste into keynote.
 
 - **New benchmark**: first full 100-prompt eval of the Jetson UD-Q3_K_M stack, both bare and + LoRA. Replaces the 20-prompt Gemma Q2_K_XL number (92.8) as the canonical Jetson datapoint.
 - **New analysis**: complexity-tail breakdown, QS single-prompt diff, TCO break-even, pts/W efficiency.
-- **New assets**: 5 PNGs (2 charts + 3 circuit renders) under `newgenes-export-assets/`.
+- **New assets**: 5 PNGs (2 charts + 3 circuit renders) under `assets/`.
 - **New scripts**: `plot_tco.py`, `plot_efficiency.py`, `render_sbol_circuit.py`, `run_demo_prompts.py`.
 - **New data**: `demo_prompts.json` (10 never-seen-before prompts for live demo).
 - **New slide kit**: seven `slide_*.md` files, each ready to drop into the deck.
@@ -848,11 +848,11 @@ Each is one presentation slide in prose form; copy-paste into keynote.
 Everything new since the 02:14 export, grouped by purpose. Relative paths are from `finetune/`.
 
 **Assets (for the deck):**
-- `newgenes-export-assets/chart_tco.png`
-- `newgenes-export-assets/chart_efficiency.png`
-- `newgenes-export-assets/circuit_crispri_inverter.png`
-- `newgenes-export-assets/circuit_qs_consensus.png`
-- `newgenes-export-assets/circuit_tumor_targeting.png`
+- `assets/chart_tco.png`
+- `assets/chart_efficiency.png`
+- `assets/circuit_crispri_inverter.png`
+- `assets/circuit_qs_consensus.png`
+- `assets/circuit_tumor_targeting.png`
 
 **Slide markdown (7 files, all generated today):**
 - `slide_qs_money_shot.md`
@@ -875,4 +875,4 @@ Everything new since the 02:14 export, grouped by purpose. Relative paths are fr
 - `sbol_eval_v2_gemma_udq3km_lora.json` (+ `.summary.json`)
 
 **Export itself:**
-- `newgenes-export.md` (this file — now with §10)
+- `REPORT.md` (this file — now with §10)

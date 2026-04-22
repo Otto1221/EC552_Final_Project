@@ -23,7 +23,7 @@ Fine-tuning open LLMs to generate synthetic biology circuit designs (SBOL JSON) 
 2. **LoRA's real value is tail risk.** Bare Jetson has 2/100 catastrophic zeros (single-token JSON bugs); LoRA has 0/100 with a floor of 78. Average hides this.
 3. **Break-even math favors local once you're past ~5,900 circuits/yr** — below that, use the API.
 
-Full detail: [`newgenes-export.md`](./newgenes-export.md).
+Full detail: [`REPORT.md`](./REPORT.md).
 
 ---
 
@@ -31,17 +31,17 @@ Full detail: [`newgenes-export.md`](./newgenes-export.md).
 
 ```
 .
-├── README.md                         ← you are here
-├── newgenes-export.md                ← master writeup (benchmarks, methodology, limitations)
+├── README.md              ← you are here
+├── REPORT.md              ← master writeup (benchmarks, methodology, limitations)
 ├── .gitignore
 │
-├── newgenes-export-assets/           ← charts and circuit renders used in the writeup (PNG)
-├── docs/                             ← BIOLOGY_VALIDATION.md, PRESENTATION_TABLE.md
-├── slides/                           ← 7 presentation-ready slide_*.md scripts
-├── configs/                          ← LoRA training configs (lora_config_*.yaml)
-├── data/                             ← train.jsonl, valid.jsonl, test.jsonl, demo_prompts.json, exemplar_bank.json
-├── results/                          ← all eval results: sbol_eval_v2_*.json + .summary.json, biology_review_*.json
-└── src/                              ← all Python scripts (39 files)
+├── assets/                ← charts and circuit renders used in the writeup (PNG)
+├── docs/                  ← BIOLOGY_VALIDATION.md, PRESENTATION_TABLE.md
+├── slides/                ← 7 presentation-ready slide_*.md scripts
+├── configs/               ← LoRA training configs (lora_config_*.yaml)
+├── data/                  ← train.jsonl, valid.jsonl, test.jsonl, demo_prompts.json, exemplar_bank.json
+├── results/               ← all eval results: sbol_eval_v2_*.json + .summary.json, biology_review_*.json
+└── src/                   ← all Python scripts (39 files)
     ├── sbol_eval_v2.py               ← deterministic 6-axis rubric scorer (the core artifact)
     ├── train.py                      ← MLX QLoRA training entry (bf16 patch + mlx_lm.lora)
     ├── infer.py, prepare_mlx.py      ← inference + MLX data prep
@@ -56,12 +56,12 @@ Full detail: [`newgenes-export.md`](./newgenes-export.md).
     ├── generate_*.py                 ← synthetic training data generators
     └── <20 other helper scripts>
 
-Scripts in `src/` read from `../data/` and write to `../results/` (or `../newgenes-export-assets/` for charts).
+Scripts in `src/` read from `../data/` and write to `../results/` (or `../assets/` for charts).
 ```
 
 **Not in the repo** (too large or licensed elsewhere):
 - Base model weights — download from HuggingFace (`Qwen/Qwen3-27B-Instruct`, `google/gemma-4-26b-a4b-it`).
-- Quantized GGUFs — rebuilt via `llama.cpp` convert scripts; see `newgenes-export.md` §8.
+- Quantized GGUFs — rebuilt via `llama.cpp` convert scripts; see `REPORT.md` §8.
 - Trained LoRA adapter — ~384 MB, available on request.
 - Opus API keys — set `ANTHROPIC_API_KEY` in your environment.
 
@@ -99,8 +99,8 @@ python3 src/analyze_ablation.py
 
 ### Generate the charts
 ```bash
-python3 src/plot_tco.py          # writes newgenes-export-assets/chart_tco.png
-python3 src/plot_efficiency.py   # writes newgenes-export-assets/chart_efficiency.png
+python3 src/plot_tco.py          # writes assets/chart_tco.png
+python3 src/plot_efficiency.py   # writes assets/chart_efficiency.png
 ```
 
 ### Train a LoRA adapter (MLX, M-series Mac, ~7.5 h)
@@ -113,7 +113,7 @@ mlx_lm.lora --config configs/lora_config_qwen35_27b.yaml
 
 ## Methodology, in one paragraph
 
-Three training-data tiers (Qwen-synthesized simple, GPT-synthesized complex, SynBioHub-scraped real) combined into 1,162 prompt→JSON pairs, chat-formatted. QLoRA (rank 8, α 16, last 16 of 64 layers) trained on a 64 GB M5 Max under MLX for 2,500 iterations (≈1.76 epochs). Deployed as `.safetensors` on Mac or converted to GGUF LoRA for Jetson runtime. Evaluated on a hand-curated 100-prompt set (zero substring overlap with training; max Jaccard 0.47), scored by a deterministic 6-axis rubric (Structural Validity 20, Behavioral Wiring 20, Biology Appropriate 20, Part Fidelity 20, Description Quality 10, Response Format 10 — total 100). Full spec + provenance + contamination check: [`newgenes-export.md`](./newgenes-export.md) §3.
+Three training-data tiers (Qwen-synthesized simple, GPT-synthesized complex, SynBioHub-scraped real) combined into 1,162 prompt→JSON pairs, chat-formatted. QLoRA (rank 8, α 16, last 16 of 64 layers) trained on a 64 GB M5 Max under MLX for 2,500 iterations (≈1.76 epochs). Deployed as `.safetensors` on Mac or converted to GGUF LoRA for Jetson runtime. Evaluated on a hand-curated 100-prompt set (zero substring overlap with training; max Jaccard 0.47), scored by a deterministic 6-axis rubric (Structural Validity 20, Behavioral Wiring 20, Biology Appropriate 20, Part Fidelity 20, Description Quality 10, Response Format 10 — total 100). Full spec + provenance + contamination check: [`REPORT.md`](./REPORT.md) §3.
 
 ---
 
@@ -134,4 +134,4 @@ Three training-data tiers (Qwen-synthesized simple, GPT-synthesized complex, Syn
 - SynBioHub, iGEM Parts Registry, DataCurationProject — scraped training data.
 - MLX, llama.cpp, Unsloth UD K-quants — training and deployment infrastructure.
 
-Class project, spring 2026. See `newgenes-export.md` for the full writeup.
+Class project, spring 2026. See `REPORT.md` for the full writeup.

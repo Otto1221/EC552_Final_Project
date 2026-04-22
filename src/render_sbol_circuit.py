@@ -127,4 +127,4 @@ if __name__ == "__main__":
             print(f"failed to parse entry {idx}", file=sys.stderr); continue
         title = f"{obj.get('name','?')}  —  score {x['score']['total']}/100"
         title += f"\n\"{x['entry']['prompt'][:110]}...\"" if len(x['entry']['prompt'])>110 else f"\n\"{x['entry']['prompt']}\""
-        render(obj, title, HERE.parent / "newgenes-export-assets" / f"circuit_{tag}.png")
+        render(obj, title, HERE.parent / "assets" / f"circuit_{tag}.png")
