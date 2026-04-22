@@ -9,6 +9,7 @@ from pathlib import Path
 from collections import Counter
 
 HERE = Path(__file__).resolve().parent
+RESULTS = HERE / "results"
 spec = importlib.util.spec_from_file_location("e", HERE / "sbol_eval_v2.py")
 e = importlib.util.module_from_spec(spec); spec.loader.exec_module(e)
 
@@ -25,10 +26,10 @@ CELLS = [
 ]
 
 def load(tag):
-    return json.load(open(HERE / f"sbol_eval_v2_{tag}.json"))
+    return json.load(open(RESULTS / f"sbol_eval_v2_{tag}.json"))
 
 def load_summary(tag):
-    return json.load(open(HERE / f"sbol_eval_v2_{tag}.summary.json"))
+    return json.load(open(RESULTS / f"sbol_eval_v2_{tag}.summary.json"))
 
 # ---------- 1. Axis breakdown ----------
 print("=" * 90)

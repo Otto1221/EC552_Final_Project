@@ -58,8 +58,8 @@ def call(url, user_prompt, max_tok=2800, timeout=1800):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--url", default="http://localhost:8080")
-    ap.add_argument("--prompts", default=str(HERE / "demo_prompts.json"))
-    ap.add_argument("--out", default=str(HERE / "demo_results.json"))
+    ap.add_argument("--prompts", default=str(HERE / "data" / "demo_prompts.json"))
+    ap.add_argument("--out", default=str(HERE / "results" / "demo_results.json"))
     args = ap.parse_args()
 
     prompts = json.load(open(args.prompts))

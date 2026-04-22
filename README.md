@@ -33,19 +33,29 @@ Full detail: [`newgenes-export.md`](./newgenes-export.md).
 .
 ├── README.md                         ← you are here
 ├── newgenes-export.md                ← master writeup (benchmarks, methodology, limitations)
-├── newgenes-export-assets/           ← charts and circuit renders used in the writeup
-├── slide_*.md                        ← seven presentation-ready slide scripts
-├── sbol_eval_v2.py                   ← deterministic 6-axis rubric scorer
+├── .gitignore
+│
+├── newgenes-export-assets/           ← charts and circuit renders used in the writeup (PNG)
+├── docs/                             ← BIOLOGY_VALIDATION.md, PRESENTATION_TABLE.md
+├── slides/                           ← 7 presentation-ready slide_*.md scripts
+├── configs/                          ← LoRA training configs (lora_config_*.yaml)
+├── data/                             ← train.jsonl, valid.jsonl, test.jsonl, demo_prompts.json, exemplar_bank.json
+├── results/                          ← all eval results: sbol_eval_v2_*.json + .summary.json, biology_review_*.json
+│
+│── # --- Code at root (scripts expect sibling data/ results/ configs/) ---
+├── sbol_eval_v2.py                   ← deterministic 6-axis rubric scorer (the core artifact)
 ├── train.py                          ← MLX QLoRA training entry (bf16 patch + mlx_lm.lora)
+├── infer.py, prepare_mlx.py          ← inference + MLX data prep
 ├── plot_tco.py, plot_efficiency.py   ← cost / efficiency charts
 ├── render_sbol_circuit.py            ← renders model JSON as a directed circuit graph
-├── run_demo_prompts.py               ← runs 10 novel prompts against a live llama-server
+├── run_demo_prompts.py               ← runs the 10 novel demo prompts against a live llama-server
 ├── scrape_circuits.py                ← pulls real SBOL from SynBioHub / iGEM for training
 ├── chen_truong_system_prompt.py      ← reference implementation of Chen & Truong 2026 prompt
-├── lora_config_*.yaml                ← training configs
-├── train.jsonl, valid.jsonl, test.jsonl ← 1,162 / 64 / 75 rows, chat format
-├── demo_prompts.json                 ← 10 held-out prompts for live demo (no training overlap)
-└── sbol_eval_v2_*.summary.json       ← per-cell summary metrics (full JSONs also included)
+├── analyze_ablation.py               ← 2×2 ablation analysis over results/
+├── check_contamination.py            ← eval-vs-train overlap audit
+├── jetson_*.py, deploy_jetson.py     ← edge deployment + Jetson eval harness
+├── generate_*.py                     ← synthetic training data generators
+└── <20 other helper scripts>
 ```
 
 **Not in the repo** (too large or licensed elsewhere):
@@ -62,7 +72,7 @@ The evaluation framework runs without model weights — point it at any OpenAI-c
 
 ### Score an existing response set
 ```bash
-python3 sbol_eval_v2.py --input sbol_eval_v2_gemma_udq3km_lora.json --summary
+python3 sbol_eval_v2.py --input results/sbol_eval_v2_gemma_udq3km_lora.json --summary
 ```
 
 ### Run the 100-prompt eval against a local llama-server
@@ -91,7 +101,7 @@ python3 plot_efficiency.py   # writes chart_efficiency.png
 
 ### Train a LoRA adapter (MLX, M-series Mac, ~7.5 h)
 ```bash
-mlx_lm.lora --config lora_config_qwen35_27b.yaml
+mlx_lm.lora --config configs/lora_config_qwen35_27b.yaml
 # outputs adapters/<run-name>/adapter.safetensors
 ```
 

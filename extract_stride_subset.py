@@ -18,9 +18,10 @@ STRIDE = int(sys.argv[2]) if len(sys.argv) > 2 else 3
 OFFSET = int(sys.argv[3]) if len(sys.argv) > 3 else 0
 OUT_TAG = f"{SRC_TAG}_s{STRIDE}"
 
-src = HERE / f"sbol_eval_v2_{SRC_TAG}.json"
-out_json = HERE / f"sbol_eval_v2_{OUT_TAG}.json"
-out_summary = HERE / f"sbol_eval_v2_{OUT_TAG}.summary.json"
+RESULTS = HERE / "results"
+src = RESULTS / f"sbol_eval_v2_{SRC_TAG}.json"
+out_json = RESULTS / f"sbol_eval_v2_{OUT_TAG}.json"
+out_summary = RESULTS / f"sbol_eval_v2_{OUT_TAG}.summary.json"
 
 results = json.load(open(src))
 target_prompts = set(p["prompt"] for p in e.PROMPTS[OFFSET::STRIDE])

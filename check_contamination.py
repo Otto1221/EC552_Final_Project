@@ -75,5 +75,5 @@ def check(path, label):
         print(f"           train: {tr[:70]}")
 
 for path, label in [("train.jsonl","train"),("valid.jsonl","valid"),("test.jsonl","test")]:
-    check(HERE / path, label)
+    check(HERE / "data" / path, label)
     print()
