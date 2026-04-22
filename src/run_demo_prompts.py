@@ -7,29 +7,12 @@ Usage (from Mac, with SSH tunnel forwarding Jetson :8080 to localhost:18080):
 Or directly on Jetson:
     python3 run_demo_prompts.py --url http://localhost:8080 --out demo_results.json
 """
-import json, time, argparse, urllib.request, urllib.error
+import json, sys, time, argparse, urllib.request, urllib.error
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-
-SYSTEM_MSG = (
-    "You are a synthetic biology assistant that converts natural language "
-    "descriptions of genetic circuits into structured JSON. Return a single "
-    "JSON object with these fields:\n\n"
-    "- \"name\": short circuit name\n"
-    "- \"components\": array of {\"name\", \"type\", \"description\"}\n"
-    "- \"interactions\": array of {\"from\", \"to\", \"type\"}\n"
-    "- \"behavior\": what the circuit does\n"
-    "- \"organism\": host organism\n\n"
-    "Component types: promoter, rbs, cds, terminator, operator, other.\n"
-    "Interaction types: transcription (promoter→cds), translation (rbs→cds), "
-    "activation (cds→promoter/operator), repression (cds→promoter/operator).\n\n"
-    "Rules:\n"
-    "- Every gene needs: promoter, rbs, cds, terminator\n"
-    "- Use snake_case names\n"
-    "- Every from/to must reference an existing component name\n"
-    "- Respond with valid JSON only, no explanation"
-)
+sys.path.insert(0, str(HERE))
+from chen_truong_system_prompt import CHEN_TRUONG_SYSTEM_MSG as SYSTEM_MSG
 
 def call(url, user_prompt, max_tok=2800, timeout=1800):
     body = {
