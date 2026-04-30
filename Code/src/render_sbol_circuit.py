@@ -23,24 +23,37 @@ def extract_json(s):
     t = re.sub(r"<\|?channel\|?>thought.*?<\|?channel\|?>", "", t, flags=re.DOTALL)
     t = re.sub(r"<\|im_start\|>.*?<\|im_end\|>", "", t, flags=re.DOTALL)
     t = t.strip()
-    m = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", t, re.DOTALL)
+    # Strip fenced wrapper if present (match fences only, not their content)
+    m = re.match(r"^```(?:json)?\s*\n?(.*?)\n?```\s*$", t, re.DOTALL)
     if m:
-        try: return json.loads(m.group(1))
-        except Exception: pass
-    # Balanced-brace scan from first '{'
+        t = m.group(1).strip()
+    # Balanced-brace scan from first '{', respecting strings/escapes
     start = t.find("{")
     if start < 0: return None
     depth = 0
+    in_str = False
+    esc = False
     for i in range(start, len(t)):
-        ch = t[i]
-        if ch == "{": depth += 1
-        elif ch == "}":
+        c = t[i]
+        if esc:
+            esc = False
+            continue
+        if c == "\\":
+            esc = True
+            continue
+        if c == '"':
+            in_str = not in_str
+            continue
+        if in_str:
+            continue
+        if c == "{":
+            depth += 1
+        elif c == "}":
             depth -= 1
             if depth == 0:
                 try: return json.loads(t[start:i+1])
-                except Exception: break
-    try: return json.loads(t[start:])
-    except Exception: return None
+                except json.JSONDecodeError: return None
+    return None
 
 TYPE_COLORS = {
     "promoter":    "#4c72b0",
@@ -79,11 +92,18 @@ def _base_name(name):
 def render(obj, title, out_path):
     G = nx.DiGraph()   # actual interactions (used for drawing edges)
     comp_types = {}
-    for c in obj.get("components", []):
-        G.add_node(c["name"])
-        comp_types[c["name"]] = c.get("type", "other")
+    valid_names = set()
+    for i, c in enumerate(obj.get("components", [])):
+        if not isinstance(c, dict): continue
+        name = c.get("name") or f"_unnamed_{i}"
+        G.add_node(name)
+        comp_types[name] = c.get("type", "other")
+        valid_names.add(name)
     for ix in obj.get("interactions", []):
-        G.add_edge(ix["from"], ix["to"], type=ix.get("type","other"))
+        if not isinstance(ix, dict): continue
+        f, t = ix.get("from"), ix.get("to")
+        if not f or not t: continue
+        G.add_edge(f, t, type=ix.get("type","other"))
 
     # Build an *augmented* undirected graph for layout only, so orphan
     # terminators / rbs get pulled next to the CDS they're named for.

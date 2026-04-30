@@ -11,7 +11,8 @@ import json, sys, time, urllib.request, urllib.error
 from pathlib import Path
 
 import importlib.util
-spec = importlib.util.spec_from_file_location("eval100", "./eval100.py")
+HERE = Path(__file__).resolve().parent
+spec = importlib.util.spec_from_file_location("eval100", str(HERE / "eval100.py"))
 e = importlib.util.module_from_spec(spec); spec.loader.exec_module(e)
 
 TAG = sys.argv[1] if len(sys.argv) > 1 else "qwen35"

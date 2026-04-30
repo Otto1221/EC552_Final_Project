@@ -10,7 +10,7 @@ Read this verbatim if you want, or use it as a skeleton. Stage directions in `[b
 
 ```bash
 # 1. Start MLX server in a terminal you can leave running
-mlx_lm.server --model /Users/arlo/models/Qwen3.5-27B-8bit-lora --port 8080 &
+mlx_lm.server --model $NG_MODEL_DIR/Qwen3.5-27B-8bit-lora --port 8080 &
 
 # 2. Wait ~30s for model load. Warm it with a throwaway request:
 curl -s http://localhost:8080/v1/chat/completions \
@@ -91,7 +91,7 @@ for axis, breakdown in score['axes'].items():
 
 [ACTION: point at each line as you say it]
 
-> "Structural validity 20 out of 20 — JSON parses, every part referenced exists. Behavioral wiring 18 out of 20 — the receptor activates the TF cascade like it should. Biology appropriate 16 out of 20 — it picked HEK293-compatible parts. Part fidelity 18, description 9, format 10. Total in the low 90s — consistent with our 91.57 average across 100 prompts."
+> "Structural validity 20 out of 20 — JSON parses, every part referenced exists. Behavioral wiring 18 out of 20 — the receptor activates the TF cascade like it should. Biology appropriate 16 out of 20 — it picked HEK293-compatible parts. Part fidelity 18, description 9, format 10. Total in the low 90s — consistent with our 92.2 average across 100 prompts."
 
 > "If this were Opus, it would score ~99. If it were the bare model with no LoRA, the JSON might be malformed — that's the 2% catastrophic failure rate I mentioned earlier."
 
@@ -115,7 +115,7 @@ python3 src/render_sbol_circuit.py && open assets/circuit_*.png
 
 [ACTION: switch to the score distribution chart, or back to your headline slide]
 
-> "What you just saw — one prompt in, one circuit out, scored 90-something — happened 100 times in our benchmark. The numbers behind 91.57 aren't synthetic; they're the average of 100 of these runs."
+> "What you just saw — one prompt in, one circuit out, scored 90-something — happened 100 times in our benchmark. The numbers behind 92.2 aren't synthetic; they're the average of 100 of these runs."
 
 > "And the same pipeline runs on a 15-watt Jetson edge device with a slightly smaller Gemma model, scoring 89.6. That's the punchline: a $1,200 box plugged into a wall socket can do this work, repeatedly, for free, offline. Whether you should use it depends on your volume — under 5,900 circuits a year, just use the API. Above that, the local model pays for itself."
 

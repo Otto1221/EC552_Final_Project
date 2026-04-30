@@ -5,8 +5,8 @@ All numbers from the 100-prompt `sbol_eval_v2` benchmark.
 | Setup | Avg score | Wall-clock (100 prompts) | Mean per-prompt | Hardware cost | Eval $ cost |
 |---|---:|---:|---:|---:|---:|
 | **Opus 4.7 (API)** | **99.22** | — (parallel) | — | $0 | **~$6.80** |
-| **Mac Studio, Q8 LoRA (MLX)** | 91.57 | 48 min | 29 s | ~$4,000 (M-series Mac) | $0 (power) |
-| **Jetson Orin NX, UD-Q3_K_M + LoRA** | 89.60 | 160 min | 96 s | **~$1,200** | $0 (power) |
+| **Mac Studio, Q8 LoRA (MLX)** | 92.2 | ~83 min | 50 s | ~$4,000 (M-series Mac) | $0 (power) |
+| **Jetson Orin NX, UD-Q3_K_M + LoRA** | 89.60 | ~210 min | 125 s | **~$1,200** | $0 (power) |
 | **Jetson Orin NX, UD-Q3_K_M bare** | 87.17 | 115 min | 69 s | ~$1,200 | $0 (power) |
 
 ## Opus API cost breakdown (Claude 4 Opus pricing)

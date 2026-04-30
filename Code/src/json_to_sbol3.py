@@ -22,6 +22,7 @@ from xml.etree import ElementTree as ET
 from xml.dom import minidom
 import hashlib
 import re
+from pathlib import Path
 
 # SBOL3 namespaces
 SBOL3 = "http://sbols.org/v3#"
@@ -93,9 +94,26 @@ SBO_ROLES = {
 BASE_URI = "https://newgenes.org/"
 
 
-def sanitize_uri(name):
-    """Convert a component name to a valid URI fragment."""
-    return re.sub(r'[^a-zA-Z0-9_]', '_', name)
+def sanitize_uri(name, _seen=None):
+    """Convert a component name to a valid URI fragment.
+
+    Non-alphanumeric chars become underscores. If _seen (a dict mapping
+    sanitized → original_name) is provided AND a sanitized form collides with
+    a different original, append `_2`, `_3`, ... to disambiguate.
+    """
+    base = re.sub(r'[^a-zA-Z0-9_]', '_', name)
+    if _seen is None:
+        return base
+    if base not in _seen:
+        _seen[base] = name
+        return base
+    if _seen[base] == name:
+        return base
+    n = 2
+    while f"{base}_{n}" in _seen:
+        n += 1
+    _seen[f"{base}_{n}"] = name
+    return f"{base}_{n}"
 
 
 def circuit_to_sbol3(circuit, circuit_name=None, description=None):
@@ -112,7 +130,10 @@ def circuit_to_sbol3(circuit, circuit_name=None, description=None):
     """
     if not circuit_name:
         # Generate from component names
-        cds_names = [c['name'] for c in circuit['components'] if c['type'] == 'cds']
+        cds_names = [
+            c['name'] for c in circuit.get('components', [])
+            if isinstance(c, dict) and c.get('type') == 'cds' and c.get('name')
+        ]
         circuit_name = '_'.join(cds_names[:3]) + '_circuit' if cds_names else 'circuit'
     circuit_name = sanitize_uri(circuit_name)
 
@@ -154,11 +175,13 @@ def circuit_to_sbol3(circuit, circuit_name=None, description=None):
 
     # Role: engineered_region
     role_el = ET.SubElement(top_comp, f'{{{SBOL3}}}role')
-    role_el.set(f'{{{RDF}}}resource', 'SO:0000804')  # engineered_region
+    role_el.set(f'{{{RDF}}}resource', SO + '0000804')  # engineered_region
 
     # --- SubComponents ---
     comp_uri_map = {}  # name → URI for reference
-    for comp in circuit['components']:
+    for comp in circuit.get('components', []):
+        if not isinstance(comp, dict) or not comp.get('name'):
+            continue
         comp_name = sanitize_uri(comp['name'])
         comp_uri = f"{circuit_uri}/{comp_name}"
         comp_uri_map[comp['name']] = comp_uri
@@ -177,9 +200,9 @@ def circuit_to_sbol3(circuit, circuit_name=None, description=None):
         sc_name.text = comp['name']
 
         # Role (SO term)
-        so_role = SO_ROLES.get(comp['type'], SO_ROLES['other'])
+        so_role = SO_ROLES.get(comp.get('type', 'other'), SO_ROLES['other'])
         sc_role = ET.SubElement(sub_comp, f'{{{SBOL3}}}role')
-        sc_role.set(f'{{{RDF}}}resource', so_role)
+        sc_role.set(f'{{{RDF}}}resource', SO + so_role.split(':')[1])
 
         # Instance of (reference to a Component definition)
         # Create a top-level Component for each part type
@@ -188,7 +211,16 @@ def circuit_to_sbol3(circuit, circuit_name=None, description=None):
         instance_of.set(f'{{{RDF}}}resource', part_def_uri)
 
     # --- Interactions ---
-    for i, ix in enumerate(circuit['interactions']):
+    for i, ix in enumerate(circuit.get('interactions', []) or []):
+        if not isinstance(ix, dict):
+            continue
+        ix_from = ix.get('from')
+        ix_to = ix.get('to')
+        # Skip if endpoints are missing or unresolved
+        if not ix_from or not ix_to:
+            continue
+        if ix_from not in comp_uri_map or ix_to not in comp_uri_map:
+            continue
         ix_name = f"interaction_{i}"
         ix_uri = f"{circuit_uri}/{ix_name}"
 
@@ -202,38 +234,39 @@ def circuit_to_sbol3(circuit, circuit_name=None, description=None):
         ix_display.text = ix_name
 
         # Interaction type
-        sbo_type = SBO_INTERACTION_TYPES.get(ix['type'], 'SBO:0000231')
+        ix_type_key = ix.get('type', '')
+        sbo_type = SBO_INTERACTION_TYPES.get(ix_type_key, 'SBO:0000231')
         ix_type = ET.SubElement(ix_el, f'{{{SBOL3}}}type')
-        ix_type.set(f'{{{RDF}}}resource', sbo_type)
+        ix_type.set(f'{{{RDF}}}resource', SBO + sbo_type.split(':')[1])
 
         # Participation: from
-        if ix['from'] in comp_uri_map:
-            part_from = ET.SubElement(ix_el, f'{{{SBOL3}}}hasParticipation')
-            p_from = ET.SubElement(part_from, f'{{{SBOL3}}}Participation')
-            p_from.set(f'{{{RDF}}}about', f"{ix_uri}/from")
+        part_from = ET.SubElement(ix_el, f'{{{SBOL3}}}hasParticipation')
+        p_from = ET.SubElement(part_from, f'{{{SBOL3}}}Participation')
+        p_from.set(f'{{{RDF}}}about', f"{ix_uri}/from")
 
-            p_from_role = ET.SubElement(p_from, f'{{{SBOL3}}}role')
-            role_key = SBO_ROLES.get(ix['type'], {}).get('from', 'SBO:0000003')
-            p_from_role.set(f'{{{RDF}}}resource', role_key)
+        p_from_role = ET.SubElement(p_from, f'{{{SBOL3}}}role')
+        role_key = SBO_ROLES.get(ix_type_key, {}).get('from', 'SBO:0000003')
+        p_from_role.set(f'{{{RDF}}}resource', SBO + role_key.split(':')[1])
 
-            p_from_participant = ET.SubElement(p_from, f'{{{SBOL3}}}participant')
-            p_from_participant.set(f'{{{RDF}}}resource', comp_uri_map[ix['from']])
+        p_from_participant = ET.SubElement(p_from, f'{{{SBOL3}}}participant')
+        p_from_participant.set(f'{{{RDF}}}resource', comp_uri_map[ix_from])
 
         # Participation: to
-        if ix['to'] in comp_uri_map:
-            part_to = ET.SubElement(ix_el, f'{{{SBOL3}}}hasParticipation')
-            p_to = ET.SubElement(part_to, f'{{{SBOL3}}}Participation')
-            p_to.set(f'{{{RDF}}}about', f"{ix_uri}/to")
+        part_to = ET.SubElement(ix_el, f'{{{SBOL3}}}hasParticipation')
+        p_to = ET.SubElement(part_to, f'{{{SBOL3}}}Participation')
+        p_to.set(f'{{{RDF}}}about', f"{ix_uri}/to")
 
-            p_to_role = ET.SubElement(p_to, f'{{{SBOL3}}}role')
-            role_key = SBO_ROLES.get(ix['type'], {}).get('to', 'SBO:0000003')
-            p_to_role.set(f'{{{RDF}}}resource', role_key)
+        p_to_role = ET.SubElement(p_to, f'{{{SBOL3}}}role')
+        role_key = SBO_ROLES.get(ix_type_key, {}).get('to', 'SBO:0000003')
+        p_to_role.set(f'{{{RDF}}}resource', SBO + role_key.split(':')[1])
 
-            p_to_participant = ET.SubElement(p_to, f'{{{SBOL3}}}participant')
-            p_to_participant.set(f'{{{RDF}}}resource', comp_uri_map[ix['to']])
+        p_to_participant = ET.SubElement(p_to, f'{{{SBOL3}}}participant')
+        p_to_participant.set(f'{{{RDF}}}resource', comp_uri_map[ix_to])
 
     # --- Part Definitions (top-level Components for each part) ---
-    for comp in circuit['components']:
+    for comp in circuit.get('components', []):
+        if not isinstance(comp, dict) or not comp.get('name'):
+            continue
         comp_name = sanitize_uri(comp['name'])
         part_uri = f"{BASE_URI}parts/{comp_name}"
 
@@ -246,6 +279,12 @@ def circuit_to_sbol3(circuit, circuit_name=None, description=None):
         pd_name = ET.SubElement(part_def, f'{{{DCTERMS}}}title')
         pd_name.text = comp['name']
 
+        # Description (optional)
+        pd_desc_text = comp.get('description', '')
+        if pd_desc_text:
+            pd_desc = ET.SubElement(part_def, f'{{{DCTERMS}}}description')
+            pd_desc.text = pd_desc_text
+
         # Namespace (required by SBOL3 spec)
         pd_ns = ET.SubElement(part_def, f'{{{SBOL3}}}hasNamespace')
         pd_ns.set(f'{{{RDF}}}resource', BASE_URI.rstrip('/'))
@@ -255,9 +294,9 @@ def circuit_to_sbol3(circuit, circuit_name=None, description=None):
         pd_type.set(f'{{{RDF}}}resource', 'http://www.biopax.org/release/biopax-level3.owl#DnaRegion')
 
         # Role
-        so_role = SO_ROLES.get(comp['type'], SO_ROLES['other'])
+        so_role = SO_ROLES.get(comp.get('type', 'other'), SO_ROLES['other'])
         pd_role = ET.SubElement(part_def, f'{{{SBOL3}}}role')
-        pd_role.set(f'{{{RDF}}}resource', so_role)
+        pd_role.set(f'{{{RDF}}}resource', SO + so_role.split(':')[1])
 
     # Serialize to string
     rough = ET.tostring(root, encoding='unicode', xml_declaration=False)
@@ -285,10 +324,16 @@ def main():
         circuit = json.loads(d['messages'][2]['content'])
         description = d['messages'][1]['content']
     elif args.input:
-        if args.input.endswith('.json'):
+        if args.input == '-':
+            circuit = json.load(sys.stdin)
+        elif args.input.endswith('.json'):
             with open(args.input) as f:
                 circuit = json.load(f)
+        elif Path(args.input).is_file():
+            # Accept any file (e.g., .txt) containing JSON content
+            circuit = json.loads(Path(args.input).read_text())
         else:
+            # Treat as raw JSON literal
             circuit = json.loads(args.input)
         description = None
     else:

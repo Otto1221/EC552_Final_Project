@@ -123,7 +123,7 @@ pip install -r requirements.txt   # or: pip install matplotlib networkx numpy sc
 python3 Code/src/score_distributions.py
 
 # Inspect a single response file
-python3 -c "import json; r=json.load(open('results/sbol_eval_v2_gemma_udq3km_lora.json')); print(r[0]['response'][:500])"
+python3 -c "import json; r=json.load(open('Code/results/sbol_eval_v2_gemma_udq3km_lora.json')); print(r[0]['response'][:500])"
 ```
 
 You'll see the score distribution table — exactly the numbers from our slides. The data and scoring code are public; nothing is hidden.

@@ -745,7 +745,7 @@ Detail: `slide_cost_latency.md`.
 
 ### 10.5 Break-even TCO analysis — cloud vs local
 
-![TCO break-even curve](assets/chart_tco.png)
+![TCO break-even curve](Code/assets/chart_tco.png)
 
 Total annual cost vs. circuits generated per year, log-log axes, 3-year capex amortization, $0.15/kWh power cost.
 
@@ -763,7 +763,7 @@ Script: `plot_tco.py`. Chart: `assets/chart_tco.png`.
 
 ### 10.6 Points-per-watt efficiency
 
-![Efficiency bar chart — pts/W](assets/chart_efficiency.png)
+![Efficiency bar chart — pts/W](Code/assets/chart_efficiency.png)
 
 Three-panel figure: Quality · Power · Efficiency (score/W, horizontal bars).
 
@@ -786,19 +786,19 @@ All three rendered automatically from the Jetson LoRA model's JSON output by `re
 
 **CRISPRi inverter — score 94/100**
 
-![CRISPRi inverter](assets/circuit_crispri_inverter.png)
+![CRISPRi inverter](Code/assets/circuit_crispri_inverter.png)
 
 Prompt: *CRISPRi inverter — constitutive dCas9 with sgRNA targeting pTarget drives GFP OFF when sgRNA is induced.*
 
 **AHL quorum-sensing consensus — score 93/100**
 
-![QS consensus](assets/circuit_qs_consensus.png)
+![QS consensus](Code/assets/circuit_qs_consensus.png)
 
 Same prompt where the bare model scored **0** (§10.3). LoRA produces a clean `luxr_cds → p_lux → luxi_cds → p_lux` positive-feedback loop with GFP readout.
 
 **Tumor-targeting Nissle circuit — score 93/100**
 
-![Tumor targeting](assets/circuit_tumor_targeting.png)
+![Tumor targeting](Code/assets/circuit_tumor_targeting.png)
 
 Prompt: *Engineer a tumor-targeting E. coli Nissle circuit: hypoxia-responsive FNR promoter drives InvA; constitutive anti-HER2 nanobody surface-displayed via INP anchor.*
 

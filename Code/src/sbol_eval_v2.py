@@ -771,7 +771,7 @@ def summarize(results: list[dict]) -> dict:
         if not s:
             failures += 1
             continue
-        resp = r.get("response", "")
+        resp = r.get("response") or ""  # guard against response=None
         if resp.startswith("<ERROR: timed out") or resp.startswith("<ERROR: <urlopen"):
             timeouts += 1
             continue

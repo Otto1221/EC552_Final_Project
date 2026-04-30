@@ -518,6 +518,13 @@ def score_record(rec, idx):
     }
 
 def main():
+    import sys
+    sys.stderr.write(
+        "\n\033[1;33mWARNING:\033[0m comprehensive_rubric.py is DEPRECATED. "
+        "It scores against the older `eval_results/jetson_eval100.json` schema; "
+        "the canonical scorer is now `Code/src/sbol_eval_v2.py`. "
+        "Set RESULTS_DIR / RESULTS_FILE if you really need to run this.\n\n")
+
     data = json.loads(RESULTS_IN.read_text())
     all_scores = [score_record(r, i) for i, r in enumerate(data)]
 

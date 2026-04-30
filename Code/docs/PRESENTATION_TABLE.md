@@ -5,7 +5,7 @@
 | Config | Platform | Quant | Score | Cost / 100 designs | Decode | Notes |
 |---|---|---|---|---|---|---|
 | **Opus 4.7** (frontier, prompt-only) | Anthropic API | bf16 | **99.22** | ~$4–6 (API) | ~50 tok/s | Upper bound; Chen & Truong techniques |
-| **Qwen 3.5 27B + LoRA** | Mac MLX | Q8 | **91.57** *⁺ | $0 (local) | 17.6 tok/s | Our best-on-device; rep_penalty 1.05 + schema retry added |
+| **Qwen 3.5 27B + LoRA** | Mac MLX | Q8 | **92.2** *⁺ | $0 (local) | 17.6 tok/s | Our best-on-device; rep_penalty 1.05 + schema retry added |
 | Qwen 3.5 27B + LoRA (pre-fix) | Mac MLX | Q8 | 90.71 | $0 (local) | 17.6 tok/s | baseline run before loop-mitigation patches |
 | Qwen 3.5 27B + LoRA | Mac GGUF | Q3_K_M | 83.99 | $0 | — | Shows quant scaling |
 | Gemma 4 26B-A4B + LoRA | Jetson Orin NX | Q2_K_XL | 92.8 *¹ | $0 | 4.55 tok/s | Edge-deployable; different eval battery |
@@ -42,7 +42,7 @@
 
 **LoRA matters (but not as much as you'd think):**
 - Q3 GGUF with LoRA: 83.99
-- Q8 MLX with LoRA: 91.57
+- Q8 MLX with LoRA: 92.2
 - Gap between Q3 and Q8 (+7.58 pts) quantifies precision tax at the edge.
 
 **The Jetson story:**
@@ -89,7 +89,7 @@ The single highest-Jaccard pair (0.47) was *thematically* similar — "quorum se
 | Cell | n | min | q25 | median | q75 | max | mean | 50-69 / 70-79 / 80-89 / 90-94 / 95-99 / 100 |
 |---|---|---|---|---|---|---|---|---|
 | Opus 4.7 | 100 | 96 | 98 | 100 | 100 | 100 | 99.22 | 0/0/0/0/32/**68** |
-| C: LoRA+default (100) | 100 | 0 | 90 | 93 | 95 | 100 | 91.57 | 0/2/18/48/30/1 |
+| C: LoRA+default (100) | 100 | 0 | 90 | 93 | 95 | 100 | 92.2 | 0/2/18/48/30/1 |
 | D: LoRA+Chen (34) | 34 | 82 | 92 | 93 | 95 | 99 | 93.18 | 0/0/5/17/12/0 |
 | B: base+Chen (34) | 34 | 80 | 91 | 94 | 95 | 100 | 92.68 | 0/0/7/14/12/1 |
 | C_s3: LoRA+default (34) | 34 | 82 | 90 | 93 | 95 | 99 | 92.21 | 0/0/8/16/10/0 |
@@ -245,14 +245,14 @@ Written up front so the Q&A doesn't have to surface them:
 - **Judge for biology validation is an LLM (Opus).** The -20 pt gap is plausible but not blind — Opus judging Cell D outputs knows they're from a smaller model. Wet-lab or human expert judging would be more defensible.
 - **Eval rubric is deterministic-by-choice.** Trades fluency-sensitivity for reproducibility (see Opus ceiling analysis above). A reviewer could ask for an LLM-judge ensemble.
 
-**What we can defend:** the 91.57 local, the 2×2 ablation finding, the 0-contamination property, the quantization reliability cliff, the 20-pt structural-vs-biology gap, the per-topology where-it-breaks story.
+**What we can defend:** the 92.2 local, the 2×2 ablation finding, the 0-contamination property, the quantization reliability cliff, the 20-pt structural-vs-biology gap, the per-topology where-it-breaks story.
 
 **What we cannot defend yet:** "this works in any lab" — requires wet-lab.
 
 ## Headline for the slide
 
 1. **Frontier ceiling:** Opus 4.7 @ **99.22** — upper bound, cloud-only, ~$5/100.
-2. **Best local:** Qwen 3.5 27B Q8 MLX + LoRA @ **91.57** — ~92% of frontier, $0 variable.
+2. **Best local:** Qwen 3.5 27B Q8 MLX + LoRA @ **92.2** — ~92% of frontier, $0 variable.
 3. **Ablation insight:** LoRA and Chen prompt are ~80% redundant; pick whichever fits your compute budget. Both push the same two axes (BA = chassis-appropriate parts, PF = part completeness) — same effect, different mechanism.
 4. **Edge deploy:** Gemma 26B-A4B MoE at 15 W holds 92.8 on its own battery.
 5. **Quantization reliability cliff:** Q8 has 1% failure rate, Q3 has 21% truncation rate — avg scores hide that Q3 is catastrophically less reliable, not gracefully degraded.

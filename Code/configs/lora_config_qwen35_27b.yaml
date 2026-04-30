@@ -2,7 +2,8 @@
 # Architecture: 64 transformer layers, 3 linear_attn + 1 full_attn (full_attention_interval=4)
 # Training target: M5 Max 64GB with iogpu.wired_limit_mb=57344 (56 GB Metal budget).
 # Deployment target: Jetson Orin NX 16GB via Q3_K_M GGUF.
-model: "/Users/arlo/models/Qwen3.5-27B-4bit"
+# To override base model: edit this file or pass --model on command line
+model: "mlx-community/Qwen3.5-27B-Instruct-4bit"
 train: true
 data: "./mlx_data"
 seed: 42

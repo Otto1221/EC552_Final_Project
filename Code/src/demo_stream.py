@@ -6,7 +6,7 @@ Usage:
     python3 src/demo_stream.py 0                    # demo_01 by index
     python3 src/demo_stream.py "custom prompt text"
 """
-import json, re, sys, time, urllib.request, urllib.error
+import json, os, re, sys, time, urllib.request, urllib.error
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -14,7 +14,7 @@ sys.path.insert(0, str(HERE))
 from chen_truong_system_prompt import CHEN_TRUONG_SYSTEM_MSG
 
 URL = "http://localhost:8080/v1/chat/completions"
-MODEL_PATH = "/Users/arlo/models/Qwen3.5-27B-8bit-lora"
+MODEL_PATH = os.getenv("NG_MODEL_PATH", "qwen35-27b-lora")
 PROMPTS = json.load(open(HERE.parent / "data" / "demo_prompts.json"))
 MAX_RETRIES = 2   # up to MAX_RETRIES + 1 total attempts
 

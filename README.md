@@ -60,7 +60,7 @@ Scripts in `Code/src/` read from `../Code/data/` and write to `../results/` (or 
 ```
 
 **Not in the repo** (too large or licensed elsewhere):
-- Base model weights — download from HuggingFace (`Qwen/Qwen3-27B-Instruct`, `google/gemma-4-26b-a4b-it`).
+- Base model weights — download from HuggingFace (`Qwen/Qwen3.5-27B-Instruct`, `google/gemma-4-26b-a4b-it`).
 - Quantized GGUFs — rebuilt via `llama.cpp` convert scripts; see `REPORT.md` §8.
 - Trained LoRA adapter — ~384 MB, available on request.
 - Opus API keys — set `ANTHROPIC_API_KEY` in your environment.

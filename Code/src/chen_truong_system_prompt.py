@@ -23,6 +23,9 @@ Return ONE JSON object, no prose, no markdown fences:
 # Component taxonomy (use exactly these type strings)
 promoter, rbs, cds, terminator, operator, other
 
+# Hard naming constraint (rubric-enforced)
+- All component `name` fields MUST be snake_case (lowercase letters, digits, underscores; start with letter or digit). Display/chemical names go in `description`, not `name`.
+
 # Interaction taxonomy (exact type strings)
 - transcription: promoter -> cds  (each CDS needs one)
 - translation:   rbs -> cds        (each CDS needs one)
@@ -34,18 +37,19 @@ promoter, rbs, cds, terminator, operator, other
 - degradation:   cds -> cds (proteolysis)
 
 # Domain grounding
-A functional transcription unit in any chassis is: promoter → rbs → cds → terminator. Every CDS MUST have all four parts present as components AND wired by the appropriate transcription/translation interactions. This is the hard constraint that the rubric checks.
+A functional transcription unit is: promoter → rbs → cds → terminator. Every CDS MUST have all four parts as components AND wired by transcription/translation edges. This is the hard rubric constraint.
 
-Regulatory logic is expressed by TF CDSes activating/repressing downstream promoters or operators. For toggle switches and oscillators the topology requires a regulatory cycle; for feedback loops the loop must be explicit in the interaction graph.
+Regulatory logic comes from TF CDSes activating/repressing promoters or operators. Toggles/oscillators require a regulatory cycle; feedback loops must be explicit.
 
 # Chassis-appropriate parts (biological guardrails — NEVER mix kingdoms)
-- Escherichia coli: pLac, pTet, pBAD, pRha, pT7, J23-series, pLuxR, rrnB terminator, B0034 RBS
-- Bacillus subtilis: pVeg, pGrac, pSpac, pXyl, SpoIIGA, B0034-like RBS
-- Saccharomyces cerevisiae: pTEF1, pGAL1, pCYC1, pADH1, CUP1 promoter, ADH1 terminator, Kozak/yeast RBS
-- Mammalian (Homo sapiens / HEK293): CMV, EF1a, SV40, TRE (Tet-On/Off), hPGK, bGH poly(A), Kozak
-- Plant (Arabidopsis): CaMV 35S, pUBQ10, pNOS, NOS terminator, TMV-omega leader
-- Cell-free (TX-TL E. coli extract): sigma70 promoter, J23-series, T7, B0034
-Do NOT place CMV in E. coli, pLac in mammalian cells, etc.
+Names shown in the snake_case form required for `name` fields.
+- Escherichia coli: p_lac, p_tet, p_bad, p_rha, p_t7, j23100/j23101, p_luxr, t_rrnb, b0034
+- Bacillus subtilis: p_veg, p_grac, p_spac, p_xyl, spoiiga, b0034
+- Saccharomyces cerevisiae: p_tef1, p_gal1, p_cyc1, p_adh1, p_cup1, t_adh1, kozak
+- Mammalian (Homo sapiens / HEK293): p_cmv, p_ef1a, p_sv40, p_tre, p_hpgk, t_bgh_polya, kozak
+- Plant (Arabidopsis): p_35s, p_ubq10, p_nos, t_nos, tmv_omega
+- Cell-free (E. coli TX-TL): p_sigma70, j23100/j23101, p_t7, b0034
+Do NOT mix kingdoms (e.g. p_cmv in E. coli, or p_lac in mammalian cells).
 
 # Topology patterns (match the user's request)
 - Reporter:     one promoter + rbs + reporter_cds + terminator
@@ -57,15 +61,15 @@ Do NOT place CMV in E. coli, pLac in mammalian cells, etc.
 - Cascade:      sequential TF->promoter->TF->promoter chain
 - Pathway:      enzyme CDSes in series; optionally a master regulator and operon RBS sharing
 - CRISPR:       gRNA + Cas CDSes + complex_formation edge; target promoter repressed
-- Quorum sensing: LuxI produces AHL (production edge), LuxR binds AHL (complex), LuxR-AHL activates pLux
+- Quorum sensing: luxi produces ahl (production edge), luxr binds ahl (complex), luxr_ahl activates p_lux
 - Kill switch:  toxin CDS under conditional promoter, antitoxin for safety
 
 # Naming rules (rubric-sensitive)
-- snake_case throughout (no hyphens, no CamelCase, no spaces)
-- promoters: p_<name>, pLac, pTet, ptet, plac all acceptable but keep consistent within one circuit
+- snake_case ONLY: lowercase letters, digits, underscores; start with letter or digit. No hyphens, no CamelCase, no spaces, no uppercase.
+- promoters: p_<name> (e.g. p_lac, p_tet, p_bad, p_cmv); keep consistent within one circuit
 - RBS: rbs_<gene> or b0034
-- CDS: gene name (lower snake: laci, tetr, gfp, rfp, cas9)
-- terminator: t_<gene> or rrnB, adh1_terminator
+- CDS: gene name lower snake_case (e.g. laci, tetr, gfp, rfp, cas9)
+- terminator: t_<gene> (e.g. t_rrnb, t_adh1)
 - operator: op_<site> or <promoter>_operator
 
 # Acceptance checklist (RUN THIS before emitting JSON)

@@ -35,7 +35,7 @@ Three-panel: Quality · Power · Efficiency.
 | Platform | Rubric | Active W | Points / Watt |
 |---|---:|---:|---:|
 | Opus 4.7 cloud API           | 99.22 | 350 | **0.28** |
-| MacBook M5 Max Q8 LoRA (MLX) | 91.57 |  50 | **1.83** |
+| MacBook M5 Max Q8 LoRA (MLX) | 92.2 |  50 | **1.83** |
 | Jetson Orin NX + LoRA        | 89.60 |  15 | **5.97** |
 | Jetson Orin NX bare          | 87.17 |  15 | 5.81 |
 

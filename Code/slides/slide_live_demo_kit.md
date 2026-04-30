@@ -32,7 +32,7 @@ cd /home/visionx/newgenes
 
 # 2. From Mac — tunnel + run the demo set
 ssh -L 18080:localhost:8080 visionx@192.168.55.1 -N &
-cd /Users/arlo/Newgenes/finetune
+cd <repo>
 python3 run_demo_prompts.py --url http://localhost:18080 --out demo_results.json
 
 # 3. Score + render the top-3

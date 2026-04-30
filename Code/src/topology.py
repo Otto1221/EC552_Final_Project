@@ -20,6 +20,7 @@ Usage:
 import json
 import sys
 import argparse
+from pathlib import Path
 from collections import defaultdict
 
 
@@ -103,13 +104,17 @@ def find_feedback_loops(graph):
             for driven_cds in driven:
                 cds_to_cds[src_cds].append((driven_cds, reg_type, target_element))
 
-    # DFS for cycles
+    # DFS for cycles using the standard directed-graph idiom:
+    #   visited = global "fully explored" set, never cleared (prevents
+    #             redundant work and re-reporting cycles from each rotation)
+    #   path_set = recursion-stack set, per traversal, used for back-edge
+    #              detection (this is what catches the cycle)
     loops = []
     visited = set()
 
     def dfs(node, path, path_set):
         if node in path_set:
-            # Found a loop — extract it
+            # Back-edge → cycle. Extract loop from path.
             loop_start = path.index(node)
             loop = path[loop_start:]
             if len(loop) >= 2:  # At least 2 nodes
@@ -126,7 +131,8 @@ def find_feedback_loops(graph):
         visited.add(node)
 
     for cds in cds_to_cds:
-        visited.clear()
+        # Per-call recursion stack; visited is intentionally NOT cleared so
+        # we don't re-traverse and re-report the same cycle from each node.
         dfs(cds, [], set())
 
     return loops, dict(cds_to_cds)
@@ -324,8 +330,11 @@ def main():
         if args.input.endswith('.json'):
             with open(args.input) as f:
                 circuit = json.load(f)
+        elif Path(args.input).is_file():  # any file, not just .json
+            with open(args.input) as f:
+                circuit = json.loads(f.read())
         else:
-            circuit = json.loads(args.input)
+            circuit = json.loads(args.input)  # assume raw JSON literal
     else:
         circuit = json.load(sys.stdin)
 
