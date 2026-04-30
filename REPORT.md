@@ -80,10 +80,12 @@ Source: `/Users/arlo/.claude/projects/-Users-arlo/memory/`. These are point-in-t
 
 ### 2.4 LoRA vs Chen-prompt ablation finding (2026-04-20)
 
+*Platform: Mac M5 Max (MLX); Q4_K_M base vs Q8 LoRA-fused.*
+
 | | Default prompt | Chen & Truong prompt |
 |---|---|---|
 | Base 4-bit | 89.71 (A) | 92.68 (B) |
-| LoRA 8-bit fused | 92.21 (C) | 93.18 (D) |
+| LoRA 8-bit fused | 92.2 (C) | 93.18 (D) |
 
 - LoRA alone: **+2.50**
 - Chen prompt alone: **+2.97**
@@ -117,7 +119,7 @@ Source: `/Users/arlo/.claude/projects/-Users-arlo/memory/`. These are point-in-t
 - **Launch:** `llama-server -m ... --lora ... -ngl 999 -fa on -ctk q8_0 -ctv q8_0 -c 4096 --host 127.0.0.1 --port 8080`.
 - **Request flags:** must pass `reasoning_budget: 0` and `chat_template_kwargs: {"enable_thinking": false}` for the `peg-gemma4` template, otherwise `content` is empty and output routes to `reasoning_content`.
 - **Must use canonical training system prompt** (~1120 chars, uniform across all 1769 rows). Generic system prompts trigger base-model schema (`circuit_type`, `repressor`, markdown-wrapped); canonical prompt triggers trained schema (`name/components/interactions/behavior/organism`).
-- **Performance:** prompt 46 tok/s, decode 4.55 tok/s, RAM 9.8 GB + 384 MB LoRA + q8 KV cache ≈ fits 15.5 GB unified.
+- **Performance:** prompt 46 tok/s, decode 7.0 tok/s, RAM 9.8 GB + 384 MB LoRA + q8 KV cache ≈ fits 15.5 GB unified.
 - **Jetson /100 eval (20-prompt battery, `jetson_eval100.py`):** **92.8 / 100**, with T1 Format 97 / T2 Schema 92 / T3 Biology 87 / T4 Relevance 98. Weak spots: snake_case 65%, cds_wiring 63%, terminator_coverage 76%. Wall time 51.4 min.
 
 ### 2.7 Dataset state (2026-04-17)
@@ -143,7 +145,7 @@ Source: `/Users/arlo/.claude/projects/-Users-arlo/memory/`. These are point-in-t
 | **Qwen 3.5 27B + LoRA** | Mac MLX | Q8 | **92.2** ⁺ | $0 (local) | 17.6 tok/s | Our best-on-device; rep_penalty 1.05 + schema retry |
 | Qwen 3.5 27B + LoRA (pre-fix) | Mac MLX | Q8 | 90.71 | $0 | 17.6 tok/s | Baseline before loop-mitigation patches |
 | Qwen 3.5 27B + LoRA | Mac GGUF | Q3_K_M | 83.99 | $0 | — | Quant scaling |
-| Gemma 4 26B-A4B + LoRA | Jetson Orin NX | Q2_K_XL | 92.8 ¹ | $0 | 4.55 tok/s | Edge-deployable (different eval battery) |
+| Gemma 4 26B-A4B + LoRA | Jetson Orin NX | Q2_K_XL | 92.8 ¹ | $0 | 7.0 tok/s | Edge-deployable (different eval battery) |
 | Qwen 3.5 27B + LoRA | Jetson Orin NX | Q3_K_M | n/a ² | — | 1.89 tok/s | Too slow to bench |
 
 ¹ 20-prompt `jetson_eval100.py` battery (not sbol_eval_v2).
@@ -207,7 +209,7 @@ The 0.47 pair shared "quorum sensing sender-receiver" theme but the eval prompt 
 | C: LoRA+default (100) | 100 | 0 | 90 | 93 | 95 | 100 | 92.2 | 0 / 2 / 18 / 48 / 30 / 1 |
 | D: LoRA+Chen (34) | 34 | 82 | 92 | 93 | 95 | 99 | 93.18 | 0 / 0 / 5 / 17 / 12 / 0 |
 | B: base+Chen (34) | 34 | 80 | 91 | 94 | 95 | 100 | 92.68 | 0 / 0 / 7 / 14 / 12 / 1 |
-| C_s3: LoRA+default (34) | 34 | 82 | 90 | 93 | 95 | 99 | 92.21 | 0 / 0 / 8 / 16 / 10 / 0 |
+| C_s3: LoRA+default (34) | 34 | 82 | 90 | 93 | 95 | 99 | 92.2 | 0 / 0 / 8 / 16 / 10 / 0 |
 | A: base+default (34) | 34 | 80 | 88 | 90 | 92 | 97 | 89.71 | 0 / 0 / 15 / 17 / 2 / 0 |
 | Q3 GGUF+LoRA (100) | 100 | 0 | 86 | 91 | 93 | 97 | 83.99 | 0 / 3 / 26 / 51 / 13 / 0 (+**7 zeros**) |
 
@@ -215,10 +217,12 @@ The 0.47 pair shared "quorum sensing sender-receiver" theme but the eval prompt 
 
 ### 3.7 Prompt-vs-LoRA ablation (2×2, stride-3 sample, n=34)
 
+*Platform: Mac M5 Max (MLX); Q4_K_M base vs Q8 LoRA-fused; n=34 prompts (stride-3 sample of the 100-prompt benchmark).*
+
 |  | Default SBOL prompt | Chen & Truong 2026 prompt |
 |---|---|---|
 | **Base 4-bit (no LoRA)** | 89.71 (A) | 92.68 (B) |
-| **LoRA 8-bit** | 92.21 (C) | **93.18 (D)** |
+| **LoRA 8-bit** | 92.2 (C) | **93.18 (D)** |
 
 | Effect | Δ |
 |---|---|
@@ -424,7 +428,7 @@ Chen & Truong report on their own benchmark (different rubric and prompt set). W
 ### 4.6 Cell C_s3 — LoRA 8-bit + default prompt (stride-3, n=34)
 
 ```json
-{"n_total": 34, "avg_total": 92.21,
+{"n_total": 34, "avg_total": 92.2,
  "axes_avg": {"SV": 20.0, "BW": 18.97, "BA": 17.65, "PF": 16.68, "DQ": 9.26, "REP": 9.65}}
 ```
 
@@ -583,7 +587,7 @@ The full converted file validates against the SBOL 3.1 schema: 16 SubComponents,
 ### 8.2 Deployment decisions
 
 - **Runtime LoRA, not destructive merge.** Earlier attempts merged-and-requantized at Q2, which destroyed MoE quality. Runtime LoRA via `llama-server --lora` preserves the adapter delta at bf16.
-- **Gemma 26B-A4B chosen for Jetson, not Qwen 27B.** Orin NX at 4.55 tok/s is usable for interactive design; Qwen 3.5 27B at 1.89 tok/s (~70 hr / 100 designs) is not. MoE's active-4B compute path is the right fit for 16 GB unified memory.
+- **Gemma 26B-A4B chosen for Jetson, not Qwen 27B.** Orin NX at 7.0 tok/s is usable for interactive design; Qwen 3.5 27B at 1.89 tok/s (~70 hr / 100 designs) is not. MoE's active-4B compute path is the right fit for 16 GB unified memory.
 - **Q8 MLX on Mac is the production floor.** Q3 GGUF shows 21 % truncation rate — unacceptable for downstream pipelines that assume parseable output. Q8 adds 1 % failure rate (acceptable with a schema-retry loop).
 - **Schema-retry + rep_penalty 1.05 + max_tokens 4000.** This combination fixed the feedback-topology loop (+21 pts) and left only one residual truncation (prompt 45 XOR gate) in the fix run.
 - **Canonical system prompt.** The training data used a 1120-char system prompt uniformly across 1769 rows. Generic prompts at inference time → base-model schema (`circuit_type`, `repressor`, markdown-wrapped). Canonical prompt → trained schema (`name/components/interactions/behavior/organism`).

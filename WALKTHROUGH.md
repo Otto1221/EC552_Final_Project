@@ -65,7 +65,7 @@ You give up 9.6 points to save $6.80 per 100 circuits, run offline, and keep you
 Averages hide interesting structure. Three findings worth knowing:
 
 ### 5.1 LoRA and a "frontier-style prompt" are ~80% redundant
-We ran a 2×2 ablation:
+We ran a 2×2 ablation on the Jetson Orin NX (Gemma 4 26B-A4B, UD-Q3_K_M):
 
 | | Default short prompt | Long Chen & Truong prompt |
 |---|---|---|
