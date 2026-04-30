@@ -44,10 +44,14 @@ SO_ROLES = {
 
 # SBO interaction types
 SBO_INTERACTION_TYPES = {
-    'activation':    'SBO:0000170',  # stimulation
-    'repression':    'SBO:0000169',  # inhibition
-    'transcription': 'SBO:0000589',  # genetic production (transcription)
-    'translation':   'SBO:0000184',  # genetic production (translation)
+    'activation':        'SBO:0000170',  # stimulation
+    'repression':        'SBO:0000169',  # inhibition
+    'inhibition':        'SBO:0000169',  # inhibition (synonym of repression per system prompt)
+    'transcription':     'SBO:0000589',  # genetic production (transcription)
+    'translation':       'SBO:0000184',  # genetic production (translation)
+    'production':        'SBO:0000393',  # production of a small molecule
+    'complex_formation': 'SBO:0000177',  # non-covalent binding
+    'degradation':       'SBO:0000179',  # degradation
 }
 
 # Participation roles
@@ -60,6 +64,10 @@ SBO_ROLES = {
         'from': 'SBO:0000020',  # inhibitor
         'to':   'SBO:0000642',  # inhibited
     },
+    'inhibition': {
+        'from': 'SBO:0000020',  # inhibitor
+        'to':   'SBO:0000642',  # inhibited
+    },
     'transcription': {
         'from': 'SBO:0000645',  # template
         'to':   'SBO:0000011',  # product
@@ -67,6 +75,18 @@ SBO_ROLES = {
     'translation': {
         'from': 'SBO:0000645',  # template
         'to':   'SBO:0000011',  # product
+    },
+    'production': {
+        'from': 'SBO:0000010',  # reactant (enzyme)
+        'to':   'SBO:0000011',  # product
+    },
+    'complex_formation': {
+        'from': 'SBO:0000280',  # ligand
+        'to':   'SBO:0000280',  # ligand (both sides of a non-covalent bond)
+    },
+    'degradation': {
+        'from': 'SBO:0000010',  # reactant (substrate being degraded)
+        'to':   'SBO:0000011',  # product (degradation product)
     },
 }
 
@@ -118,6 +138,10 @@ def circuit_to_sbol3(circuit, circuit_name=None, description=None):
     # Name
     name_el = ET.SubElement(top_comp, f'{{{DCTERMS}}}title')
     name_el.text = circuit_name.replace('_', ' ').title()
+
+    # Namespace (required by SBOL3 spec)
+    ns_el = ET.SubElement(top_comp, f'{{{SBOL3}}}hasNamespace')
+    ns_el.set(f'{{{RDF}}}resource', BASE_URI.rstrip('/'))
 
     # Description
     if description:
@@ -221,6 +245,10 @@ def circuit_to_sbol3(circuit, circuit_name=None, description=None):
 
         pd_name = ET.SubElement(part_def, f'{{{DCTERMS}}}title')
         pd_name.text = comp['name']
+
+        # Namespace (required by SBOL3 spec)
+        pd_ns = ET.SubElement(part_def, f'{{{SBOL3}}}hasNamespace')
+        pd_ns.set(f'{{{RDF}}}resource', BASE_URI.rstrip('/'))
 
         # Type: DNA
         pd_type = ET.SubElement(part_def, f'{{{SBOL3}}}type')
