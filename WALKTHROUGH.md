@@ -65,12 +65,12 @@ You give up 9.6 points to save $6.80 per 100 circuits, run offline, and keep you
 Averages hide interesting structure. Three findings worth knowing:
 
 ### 5.1 LoRA and a "frontier-style prompt" are ~80% redundant
-We ran a 2×2 ablation on the Jetson Orin NX (Gemma 4 26B-A4B, UD-Q3_K_M):
+We ran a 2×2 ablation on the Mac M5 Max (Qwen 3.5 27B; Q4_K_M base vs Q8 LoRA-fused; n=34 stride-3 sample of the 100-prompt benchmark):
 
 | | Default short prompt | Long Chen & Truong prompt |
 |---|---|---|
-| **Base model** | 86.94 (Cell A) | 89.91 (Cell B, +2.97) |
-| **+ our LoRA** | 89.44 (Cell C, +2.50) | 90.41 (Cell D, +3.47) |
+| **Base model** | 89.71 (Cell A) | 92.68 (Cell B, +2.97) |
+| **+ our LoRA** | 92.21 (Cell C, +2.50) | 93.18 (Cell D, +3.47) |
 
 Solo gains: **+2.97** from prompt alone, **+2.50** from LoRA alone. Combined: only **+3.47** — much less than the **+5.47** you'd expect if they stacked. They're teaching the model the *same* things via different channels. Pick whichever fits your compute budget.
 

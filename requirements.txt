@@ -15,6 +15,7 @@ scipy>=1.7           # plot_tco.py (curve fits)
 
 # ---- HTTP eval runners (jetson_sbol_eval_v2_http.py, infer.py) ----
 requests>=2.25       # used by scrape_circuits.py, infer.py
+defusedxml>=0.7      # safe XML parsing for scrape_circuits.py
 
 # ---- PDF report generation (only if you want to rebuild the report) ----
 reportlab>=3.6       # generates Newgenes Final Project Report.pdf

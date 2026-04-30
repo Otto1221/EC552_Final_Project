@@ -12,7 +12,7 @@ OUT.parent.mkdir(exist_ok=True)
 # Active watts = power during inference, not idle
 ROWS = [
     ("Opus 4.7\n(cloud API)",         99.22,  350.0, "#c44e52", "estimated datacenter server W/request,\ntypical per-request allocation"),
-    ("MacBook M5 Max\nQ8 LoRA (MLX)", 91.57,   50.0, "#4c72b0", "measured peak during inference"),
+    ("MacBook M5 Max\nQ8 LoRA (MLX)", 92.2,   50.0, "#4c72b0", "measured peak during inference"),
     ("Jetson Orin NX\nUD-Q3_K_M + LoRA", 89.60, 15.0, "#55a868", "~15W TDP, measured sustained"),
     ("Jetson Orin NX\nUD-Q3_K_M bare",   87.17, 15.0, "#9aab6a", "same hardware, no LoRA"),
 ]

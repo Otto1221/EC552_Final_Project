@@ -121,7 +121,7 @@ Three training-data tiers (Qwen-synthesized simple, GPT-synthesized complex, Syn
 
 - **One model family** evaluated end-to-end (Qwen 3.5 27B), plus one edge datapoint (Gemma 4 26B-A4B). No transfer to Llama / Mistral / DeepSeek.
 - **One task** — SBOL JSON generation only. No downstream assembly, part-swapping, or wet-lab validation.
-- **Structural rubric, not biological.** 80 / 100 points are schema + wiring; only 20 points touch biology. A separate Opus-as-judge biology review scored the LoRA 71.4 / 100 — a 20-point gap that a purely structural rubric cannot see. See [`Code/docs/BIOLOGY_VALIDATION.md`](./docs/BIOLOGY_VALIDATION.md).
+- **Structural rubric, not biological.** 80 / 100 points are schema + wiring; only 20 points touch biology. A separate Opus-as-judge biology review scored the LoRA 71.4 / 100 — a 20-point gap that a purely structural rubric cannot see. See [`Code/docs/BIOLOGY_VALIDATION.md`](./Code/docs/BIOLOGY_VALIDATION.md).
 - **Single training seed**, ±1 pt run-to-run variance plausible.
 - **No in-vivo validation.** Rubric measures "is this a plausible circuit specification," not "does it work in E. coli."
 

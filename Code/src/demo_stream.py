@@ -219,19 +219,30 @@ try:
     elif _has("hek", "hek293", "mammalian", "cho", "human"):
         org = "mammalian"
     elif _has("subtilis", "bacillus"):
-        org = "bsubtilis"
+        org = "bacillus"  # rubric expects 'bacillus' (not 'bsubtilis')
+    elif _has("arabidopsis", "tobacco", "plant", "thaliana"):
+        org = "plant"
+    elif _has("cell-free", "cell free", "cellfree", "in vitro"):
+        org = "cellfree"
     else:
         org = "ecoli"  # conservative default for the rubric
-    # Approximate difficulty/topology for live demos. For benchmark runs use the
-    # canonical entry from data/eval100_prompts.json which has authoritative diff/topo.
-    diff = 3  # mid-range default; upgrade to 4-5 for complex prompts via env override
-    try:
-        diff = int(__import__("os").environ.get("DEMO_DIFF", str(diff)))
-    except ValueError:
-        pass
-    topo = __import__("os").environ.get("DEMO_TOPO", "reporter")
+    # Use the canonical entry's metadata when running an indexed prompt; fall
+    # back to env-var-overridable defaults for free-text custom prompts.
+    if 'entry' in locals() and isinstance(entry, dict) and entry.get("diff") is not None:
+        diff = entry["diff"]
+        topo = entry.get("topo", "reporter")
+        org = entry.get("org", org)
+        kw = entry.get("kw", [])
+    else:
+        try:
+            diff = int(__import__("os").environ.get("DEMO_DIFF", "3"))
+        except ValueError:
+            diff = 3
+        diff = max(1, min(5, diff))  # clamp to rubric's range
+        topo = __import__("os").environ.get("DEMO_TOPO", "reporter")
+        kw = []
     entry = {"id": "live", "diff": diff, "org": org, "topo": topo,
-             "prompt": prompt, "kw": [], "must_have": []}
+             "prompt": prompt, "kw": kw, "must_have": []}
     score = score_axes(entry, full)
     print(f"\n\033[1;36m=== RUBRIC SCORE (deterministic Python) ===\033[0m")
     print(f"\033[1;32mTOTAL: {score['total']}/100\033[0m")

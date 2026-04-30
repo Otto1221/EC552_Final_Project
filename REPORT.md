@@ -38,13 +38,13 @@ The `examples/` directory contains sample usage patterns and demonstrations that
 
 ### 1.2 Project-local `CLAUDE.md` and `.claude/rules/*.md`
 
-None present at `/Users/arlo/Newgenes/` or `/Users/arlo/Newgenes/finetune/`. Project uses global rules only.
+None present at `<repo>/` or `<repo>/`. Project uses global rules only.
 
 ---
 
 ## 2. Session Memory (auto-memory)
 
-Source: `/Users/arlo/.claude/projects/-Users-arlo/memory/`. These are point-in-time observations; verify against current code before citing as live state.
+Source: `<home>/.claude/projects/-Users-arlo/memory/`. These are point-in-time observations; verify against current code before citing as live state.
 
 ### 2.1 Index (`MEMORY.md`)
 
@@ -76,7 +76,7 @@ Source: `/Users/arlo/.claude/projects/-Users-arlo/memory/`. These are point-in-t
   - **DQ** Design Quality (10) — description informativeness, naming conventions, modularity, no redundancy
   - **REP** Robustness / Engineering Practice (10) — feedback intentional, burden reasonable, chassis appropriate, regulatory hierarchy
 - **Determinism by choice:** no LLM-judge in the primary path; all axes rule-based for reproducibility and zero-cost comparison.
-- Rubric: `/Users/arlo/Newgenes/finetune/sbol_eval_v2.py`; Runner: `jetson_sbol_eval_v2_http.py`; Results: `sbol_eval_v2_<tag>.{json,summary.json,log}`.
+- Rubric: `Code/src/sbol_eval_v2.py`; Runner: `jetson_sbol_eval_v2_http.py`; Results: `sbol_eval_v2_<tag>.{json,summary.json,log}`.
 
 ### 2.4 LoRA vs Chen-prompt ablation finding (2026-04-20)
 
@@ -539,7 +539,7 @@ Model: Qwen 3.5 27B Q8 MLX + LoRA, Chen prompt (Cell D). Score: 99/100. Biology 
 
 ## 7. SBOL3 RDF/XML Conversion
 
-Converter: `/Users/arlo/Newgenes/finetune/json_to_sbol3.py`. Maps component types to SO roles (promoter→SO:0000167, rbs→SO:0000139, cds→SO:0000316, terminator→SO:0000141, operator→SO:0000057) and interaction types to SBO terms (transcription→SBO:0000589, translation→SBO:0000184, repression→SBO:0000169, activation→SBO:0000170). Emits a top-level `sbol3:Component` per circuit with `sbol3:SubComponent` features for each part and `sbol3:Interaction` nodes for each edge.
+Converter: `Code/src/json_to_sbol3.py`. Maps component types to SO roles (promoter→SO:0000167, rbs→SO:0000139, cds→SO:0000316, terminator→SO:0000141, operator→SO:0000057) and interaction types to SBO terms (transcription→SBO:0000589, translation→SBO:0000184, repression→SBO:0000169, activation→SBO:0000170). Emits a top-level `sbol3:Component` per circuit with `sbol3:SubComponent` features for each part and `sbol3:Interaction` nodes for each edge.
 
 Excerpt of converted repressilator (first ~100 lines of RDF/XML):
 
@@ -622,7 +622,7 @@ The full converted file validates against the SBOL 3.1 schema: 16 SubComponents,
 
 ## 9. File Index
 
-All paths under `/Users/arlo/Newgenes/finetune/` unless noted.
+All paths under `<repo>/` unless noted.
 
 ### 9.1 Rubric & runners
 - `sbol_eval_v2.py` — 6-axis rubric (byte-stable v2)
@@ -636,7 +636,7 @@ All paths under `/Users/arlo/Newgenes/finetune/` unless noted.
 - `score_distributions.py` — quartiles + histogram bins per cell
 - `json_to_sbol3.py` — JSON → SBOL 3.1 RDF/XML converter
 - `generate_data_llm.py` — two-stage dataset generator (Qwen 2.5 72B + GPT-5.4)
-- `/Users/arlo/Newgenes/newgenes/sbol_builder.py` — companion SBOL builder
+- `Code/src/json_to_sbol3.py` — companion SBOL builder
 
 ### 9.2 Results (summary JSON)
 - `sbol_eval_v2_opus_47.summary.json` — frontier n=100

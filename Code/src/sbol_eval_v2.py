@@ -771,8 +771,12 @@ def summarize(results: list[dict]) -> dict:
         if not s:
             failures += 1
             continue
-        if r.get("response","").startswith("<ERROR: timed out") or r.get("response","").startswith("<ERROR: <urlopen"):
+        resp = r.get("response", "")
+        if resp.startswith("<ERROR: timed out") or resp.startswith("<ERROR: <urlopen"):
             timeouts += 1
+            continue
+        if resp.startswith("<ERROR:"):  # any other transport / HTTP error
+            failures += 1
             continue
         total += s.get("total", 0)
         for a in AXIS_MAX:

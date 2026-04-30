@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
 """
+DEPRECATED — Legacy 250-pt rubric for the older `eval_results/jetson_eval100.json`
+schema (`rec['difficulty']`, `rec['scores']`).  The current canonical scorer is
+`sbol_eval_v2.py`, which uses a different schema (`rec['entry']['diff']`,
+`rec['score']`).  This file is kept for historical reference; it will not run
+against the current results files in `Code/results/`.
+
+Original docstring:
 Newgenes Comprehensive Rubric (v2, 250 pts)
 ============================================
 

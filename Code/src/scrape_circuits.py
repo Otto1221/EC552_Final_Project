@@ -9,7 +9,8 @@ Usage:
 import json
 import time
 import argparse
-import xml.etree.ElementTree as ET
+# Use defusedxml (safe parser) for XML from external sources
+import defusedxml.ElementTree as ET
 from pathlib import Path
 from urllib.parse import quote
 
