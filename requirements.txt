@@ -1,0 +1,38 @@
+# Newgenes — runtime dependencies
+#
+# Minimal install (run demos, scoring, plots, SBOL3 validation):
+#     pip install -r requirements.txt
+#
+# Optional training-only dependencies (not needed to reproduce eval/demo):
+#     pip install -r requirements-train.txt   # if present, otherwise see README
+
+# ---- core: SBOL3 validation + circuit rendering ----
+sbol3>=1.0           # pysbol3 reference implementation (SBOL3 RDF/XML validator)
+networkx>=2.6        # graph rendering for render_sbol_circuit.py
+matplotlib>=3.1      # PNG circuit images, ablation plots
+numpy>=1.20          # numeric ops in scorers and plots
+scipy>=1.7           # plot_tco.py (curve fits)
+
+# ---- HTTP eval runners (jetson_sbol_eval_v2_http.py, infer.py) ----
+requests>=2.25       # used by scrape_circuits.py, infer.py
+
+# ---- PDF report generation (only if you want to rebuild the report) ----
+reportlab>=3.6       # generates Newgenes Final Project Report.pdf
+
+# ---- training (Mac, Apple Silicon) — install separately if you actually train ----
+# mlx>=0.10
+# mlx-lm>=0.16
+
+# ---- training (CUDA / cross-platform) — install separately if you actually train ----
+# torch>=2.0
+# transformers>=4.40
+# peft>=0.10
+# datasets>=2.18
+# accelerate>=0.28
+
+# ---- API access for Opus baseline (optional, only if you want to reproduce ceiling row) ----
+# anthropic>=0.30
+
+# Note: the demo (Code/src/demo_stream.py) ALSO requires a running model server
+# at http://localhost:8080 — see README.md for setup. The demo itself only
+# needs the packages above; the *server* needs mlx-lm (Mac) or llama.cpp (Jetson).

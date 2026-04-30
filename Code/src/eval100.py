@@ -116,7 +116,7 @@ def _pct(passing, total, max_pts):
 
 def _extract_json(raw_text):
     text = raw_text.strip()
-    text = re.sub(r'<\|channel\>thought.*?<channel\|>', '', text, flags=re.DOTALL)
+    text = re.sub(r'<\|?channel\|?>thought.*?<\|?channel\|?>', '', text, flags=re.DOTALL)
     fence = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', text, re.DOTALL)
     if fence:
         text = fence.group(1)

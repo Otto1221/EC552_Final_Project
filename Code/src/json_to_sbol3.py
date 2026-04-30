@@ -150,7 +150,7 @@ def circuit_to_sbol3(circuit, circuit_name=None, description=None):
 
     # Type: DNA
     type_el = ET.SubElement(top_comp, f'{{{SBOL3}}}type')
-    type_el.set(f'{{{RDF}}}resource', 'SBO:0000251')  # DNA
+    type_el.set(f'{{{RDF}}}resource', 'http://www.biopax.org/release/biopax-level3.owl#DnaRegion')  # SBOL3 standard DNA component type
 
     # Role: engineered_region
     role_el = ET.SubElement(top_comp, f'{{{SBOL3}}}role')
@@ -252,7 +252,7 @@ def circuit_to_sbol3(circuit, circuit_name=None, description=None):
 
         # Type: DNA
         pd_type = ET.SubElement(part_def, f'{{{SBOL3}}}type')
-        pd_type.set(f'{{{RDF}}}resource', 'SBO:0000251')
+        pd_type.set(f'{{{RDF}}}resource', 'http://www.biopax.org/release/biopax-level3.owl#DnaRegion')
 
         # Role
         so_role = SO_ROLES.get(comp['type'], SO_ROLES['other'])

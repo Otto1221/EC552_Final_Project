@@ -48,9 +48,13 @@ import json, re
 from pathlib import Path
 from statistics import mean, median
 
-RESULTS_IN  = Path("/Users/arlo/Newgenes/finetune/eval_results/jetson_eval100.json")
-SCORECARD   = Path("/Users/arlo/Newgenes/finetune/eval_results/comprehensive_scorecard.md")
-SCORES_JSON = Path("/Users/arlo/Newgenes/finetune/eval_results/comprehensive_scores.json")
+# Default paths point at this repo's results/ directory; override via CLI / env if needed.
+import os as _os
+_DEFAULT_RESULTS_DIR = Path(__file__).resolve().parent.parent / "results"
+_RESULTS_DIR = Path(_os.environ.get("RESULTS_DIR", str(_DEFAULT_RESULTS_DIR)))
+RESULTS_IN  = _RESULTS_DIR / _os.environ.get("RESULTS_FILE", "jetson_eval100.json")
+SCORECARD   = _RESULTS_DIR / "comprehensive_scorecard.md"
+SCORES_JSON = _RESULTS_DIR / "comprehensive_scores.json"
 
 ALLOWED_TYPES = {'promoter', 'rbs', 'cds', 'terminator', 'operator', 'other'}
 
@@ -230,7 +234,7 @@ def extract_json(raw):
     if not raw:
         raise ValueError('empty')
     text = raw.strip()
-    text = re.sub(r'<\|channel\>thought.*?<channel\|>', '', text, flags=re.DOTALL)
+    text = re.sub(r'<\|?channel\|?>thought.*?<\|?channel\|?>', '', text, flags=re.DOTALL)
     fence = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', text, re.DOTALL)
     if fence:
         text = fence.group(1)
@@ -640,7 +644,7 @@ def main():
     push("  what you want when reporting to a domain audience.\n")
 
     push("---")
-    push("*Rubric source: `/Users/arlo/Newgenes/finetune/comprehensive_rubric.py`*  ")
+    push("*Rubric source: `Code/src/comprehensive_rubric.py`*  ")
     push("*Raw per-prompt scores: `comprehensive_scores.json`*  ")
     push("*Underlying responses: `jetson_eval100.json`*")
 

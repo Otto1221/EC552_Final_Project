@@ -6,7 +6,7 @@ Usage:
     python3 src/demo_stream.py 0                    # demo_01 by index
     python3 src/demo_stream.py "custom prompt text"
 """
-import json, sys, time, urllib.request, urllib.error
+import json, re, sys, time, urllib.request, urllib.error
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -209,12 +209,28 @@ if final_obj is None:
 try:
     from sbol_eval_v2 import score_axes, AXIS_MAX
     org_raw = (final_obj.get("organism") or "").lower()
-    org = ("ecoli" if "coli" in org_raw
-           else "yeast" if ("yeast" in org_raw or "cerevisiae" in org_raw)
-           else "mammalian" if ("hek" in org_raw or "mammalian" in org_raw or "cho" in org_raw)
-           else "bsubtilis" if "subtilis" in org_raw
-           else "ecoli")
-    entry = {"id": "live", "diff": 2, "org": org, "topo": "biosensor",
+    # Word-bounded matches to avoid false positives like "borrelia" matching "coli"
+    def _has(*tokens):
+        return any(re.search(rf"\b{re.escape(t)}\b", org_raw) for t in tokens)
+    if _has("e. coli", "ecoli", "escherichia coli", "coli"):
+        org = "ecoli"
+    elif _has("yeast", "cerevisiae", "saccharomyces"):
+        org = "yeast"
+    elif _has("hek", "hek293", "mammalian", "cho", "human"):
+        org = "mammalian"
+    elif _has("subtilis", "bacillus"):
+        org = "bsubtilis"
+    else:
+        org = "ecoli"  # conservative default for the rubric
+    # Approximate difficulty/topology for live demos. For benchmark runs use the
+    # canonical entry from data/eval100_prompts.json which has authoritative diff/topo.
+    diff = 3  # mid-range default; upgrade to 4-5 for complex prompts via env override
+    try:
+        diff = int(__import__("os").environ.get("DEMO_DIFF", str(diff)))
+    except ValueError:
+        pass
+    topo = __import__("os").environ.get("DEMO_TOPO", "reporter")
+    entry = {"id": "live", "diff": diff, "org": org, "topo": topo,
              "prompt": prompt, "kw": [], "must_have": []}
     score = score_axes(entry, full)
     print(f"\n\033[1;36m=== RUBRIC SCORE (deterministic Python) ===\033[0m")

@@ -11,12 +11,35 @@ import networkx as nx
 HERE = Path(__file__).resolve().parent
 
 def extract_json(s):
+    """Extract a JSON object from messy LLM output.
+
+    Handles: <think>...</think> blocks (Qwen3.5/DeepSeek), Harmony channel-thought
+    blocks (with single OR double pipes), fenced ```json``` blocks, and balanced-
+    brace fallback for output with leading prose. Returns None if nothing parses.
+    """
     if s is None: return None
-    m = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", s, re.DOTALL)
+    t = s.strip()
+    t = re.sub(r"<think>.*?</think>", "", t, flags=re.DOTALL)
+    t = re.sub(r"<\|?channel\|?>thought.*?<\|?channel\|?>", "", t, flags=re.DOTALL)
+    t = re.sub(r"<\|im_start\|>.*?<\|im_end\|>", "", t, flags=re.DOTALL)
+    t = t.strip()
+    m = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", t, re.DOTALL)
     if m:
         try: return json.loads(m.group(1))
         except Exception: pass
-    try: return json.loads(s)
+    # Balanced-brace scan from first '{'
+    start = t.find("{")
+    if start < 0: return None
+    depth = 0
+    for i in range(start, len(t)):
+        ch = t[i]
+        if ch == "{": depth += 1
+        elif ch == "}":
+            depth -= 1
+            if depth == 0:
+                try: return json.loads(t[start:i+1])
+                except Exception: break
+    try: return json.loads(t[start:])
     except Exception: return None
 
 TYPE_COLORS = {

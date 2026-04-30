@@ -101,7 +101,7 @@ def _pct_score(passing, total, max_pts):
 def _extract_json(raw_text):
     """Extract JSON object from model output, handling thinking blocks and fences."""
     text = raw_text.strip()
-    text = re.sub(r'<\|channel\>thought.*?<channel\|>', '', text, flags=re.DOTALL)
+    text = re.sub(r'<\|?channel\|?>thought.*?<\|?channel\|?>', '', text, flags=re.DOTALL)
     fence_match = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', text, re.DOTALL)
     if fence_match:
         text = fence_match.group(1)

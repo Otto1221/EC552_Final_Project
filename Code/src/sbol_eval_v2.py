@@ -253,7 +253,7 @@ def extract_json(raw: str) -> dict | None:
     t = raw.strip()
     # Strip <think>...</think> blocks (Qwen3.5, deepseek-style)
     t = re.sub(r"<think>.*?</think>", "", t, flags=re.DOTALL)
-    t = re.sub(r"<\|channel\|>thought.*?<\|channel\|>", "", t, flags=re.DOTALL)
+    t = re.sub(r"<\|?channel\|?>thought.*?<\|?channel\|?>", "", t, flags=re.DOTALL)
     # Strip any leading/trailing whitespace after removal
     t = t.strip()
     # Prefer fenced JSON block
@@ -797,3 +797,34 @@ def summarize(results: list[dict]) -> dict:
         "by_organism": {k: round(sum(v)/len(v), 2) for k, v in sorted(by_org.items())},
         "by_topology": {k: round(sum(v)/len(v), 2) for k, v in sorted(by_topo.items())},
     }
+
+
+# ---------------------------------------------------------------------------
+# CLI — print summary of an existing results JSON
+# ---------------------------------------------------------------------------
+def _main():
+    import argparse, json as _json
+    ap = argparse.ArgumentParser(description="Score / summarize SBOL eval v2 runs.")
+    ap.add_argument("--input", required=True, help="Path to sbol_eval_v2_<tag>.json (incremental results).")
+    ap.add_argument("--summary", action="store_true",
+                    help="Print summary (avg, axes, by-difficulty/organism/topology).")
+    ap.add_argument("--score-row", type=int, default=None,
+                    help="Re-score a single row by index (debugging).")
+    args = ap.parse_args()
+    results = _json.load(open(args.input))
+    if args.score_row is not None:
+        r = results[args.score_row]
+        s = score_axes(r["entry"], r.get("response", ""))
+        print(_json.dumps(s, indent=2))
+        return
+    if args.summary:
+        out = summarize(results)
+        print(_json.dumps(out, indent=2))
+        return
+    # Default: brief one-line summary
+    out = summarize(results)
+    print(f"n={out['n_completed']}/{out['n_total']}  avg={out['avg_total']}  "
+          f"axes={out['axes_avg']}")
+
+if __name__ == "__main__":
+    _main()

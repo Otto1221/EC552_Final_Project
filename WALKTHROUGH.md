@@ -102,7 +102,7 @@ Six axes, totaling 100 points, calculated by **code** (no human judges, no other
 
 A circuit scoring 95+ is publication-quality. 80–95 is "needs minor cleanup." Below 70 means real semantic errors.
 
-**Honest caveat:** 80 of the 100 points are structural (schema + wiring). Only 20 touch *biology*. We ran a separate Opus-as-judge biology review on our LoRA outputs and scored 71.4 / 100 — meaning a structurally perfect circuit isn't always biologically sensible. See `docs/BIOLOGY_VALIDATION.md`.
+**Honest caveat:** 80 of the 100 points are structural (schema + wiring). Only 20 touch *biology*. We ran a separate Opus-as-judge biology review on our LoRA outputs and scored 71.4 / 100 — meaning a structurally perfect circuit isn't always biologically sensible. See `Code/docs/BIOLOGY_VALIDATION.md`.
 
 ---
 
@@ -120,7 +120,7 @@ cd EC552_Final_Project
 pip install -r requirements.txt   # or: pip install matplotlib networkx numpy scipy
 
 # Look at existing benchmark results
-python3 src/score_distributions.py
+python3 Code/src/score_distributions.py
 
 # Inspect a single response file
 python3 -c "import json; r=json.load(open('results/sbol_eval_v2_gemma_udq3km_lora.json')); print(r[0]['response'][:500])"
@@ -141,7 +141,7 @@ Start your endpoint on `localhost:8080`, then:
 ```bash
 # This sends all 100 evaluation prompts and writes results/sbol_eval_v2_<tag>.json
 LLAMA_URL=http://localhost:8080/v1/chat/completions \
-    python3 src/jetson_sbol_eval_v2_http.py mymodel_v1
+    python3 Code/src/jetson_sbol_eval_v2_http.py mymodel_v1
 ```
 
 Time depends on your model speed. On a MacBook with a 27B Q8 model: ~50s × 100 prompts = ~80 min. On a Jetson: ~2.5 hours. On the OpenAI API: ~10 min.
@@ -164,7 +164,7 @@ huggingface-cli download Qwen/Qwen3.5-27B-Instruct --local-dir ./Qwen3.5-27B
 mlx_lm.convert --hf-path ./Qwen3.5-27B --mlx-path ./Qwen3.5-27B-mlx -q  # -q = quantize to 4-bit
 
 # 3. Train the LoRA (uses our config + our 1,162-row dataset)
-mlx_lm.lora --config configs/lora_config_qwen35_27b.yaml
+mlx_lm.lora --config Code/configs/lora_config_qwen35_27b.yaml
 
 # 4. Run inference with your fresh LoRA
 mlx_lm.generate \
@@ -174,7 +174,7 @@ mlx_lm.generate \
     --temp 0.1 --max-tokens 1500
 ```
 
-The training data is in `data/train.jsonl` (1,162 rows). You can edit it, add your own examples, retrain.
+The training data is in `Code/data/train.jsonl` (1,162 rows). You can edit it, add your own examples, retrain.
 
 ### Tier 4: Deploy to a Jetson edge device
 
@@ -207,13 +207,13 @@ scp Qwen3.5-27B-Q3_K_M.gguf visionx@192.168.55.1:~/models/
 ├── README.md            ← high-level summary, headline numbers
 ├── REPORT.md            ← the master writeup, every detail
 ├── WALKTHROUGH.md       ← this file (beginner-friendly)
-├── assets/              ← charts and circuit graph PNGs
-├── data/                ← train/valid/test datasets, demo prompts
-├── configs/             ← LoRA training YAML files
-├── results/             ← every model's eval output (~25 JSON files)
-├── docs/                ← biology validation notes, presentation tables
-├── slides/              ← presentation-ready slide_*.md files
-└── src/                 ← all 39 Python scripts
+├── Code/assets/              ← charts and circuit graph PNGs
+├── Code/data/                ← train/valid/test datasets, demo prompts
+├── Code/configs/             ← LoRA training YAML files
+├── Code/results/             ← every model's eval output (~25 JSON files)
+├── Code/docs/                ← biology validation notes, presentation tables
+├── Code/slides/              ← presentation-ready slide_*.md files
+└── Code/src/                 ← all 39 Python scripts
     ├── sbol_eval_v2.py       ← THE rubric. Read this first if you want to understand scoring
     ├── jetson_sbol_eval_v2_http.py  ← runs the 100-prompt eval against any HTTP endpoint
     ├── chen_truong_system_prompt.py ← the long "essay" prompt
@@ -249,7 +249,7 @@ Things you could do with this work:
 - **Add domain-specific training data.** We're weakest on metabolic pathways and CRISPR systems — adding 200 hand-curated examples in those areas would likely close most of the gap to Opus.
 - **Build a wet-lab validation pipeline.** Take our top-scoring circuits, build them in *E. coli*, measure if they behave as predicted. This is the only way to test whether structural correctness translates to biological correctness.
 - **Try an even smaller model.** The Jetson result used a 26B-parameter model. What about an 8B model? A 3B model? At what size does quality cliff off?
-- **Different output formats.** Generate SBOL3 XML directly instead of JSON. We have an SBOL3 converter in `src/json_to_sbol3.py` but didn't fine-tune on it.
+- **Different output formats.** Generate SBOL3 XML directly instead of JSON. We have an SBOL3 converter in `Code/src/json_to_sbol3.py` but didn't fine-tune on it.
 
 ---
 

@@ -3,12 +3,12 @@
 import json
 import os
 
-BASE = os.path.dirname(os.path.abspath(__file__))
-OUT_DIR = os.path.join(BASE, 'mlx_data')
+SRC_DIR = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data'))
+OUT_DIR = os.path.join(SRC_DIR, 'mlx_data')
 os.makedirs(OUT_DIR, exist_ok=True)
 
 for split in ['train', 'valid', 'test']:
-    src = os.path.join(BASE, f'{split}.jsonl')
+    src = os.path.join(SRC_DIR, f'{split}.jsonl')
     dst = os.path.join(OUT_DIR, f'{split}.jsonl')
     count = 0
     with open(src) as f_in, open(dst, 'w') as f_out:
