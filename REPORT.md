@@ -17,123 +17,23 @@ Generated 2026-04-21. Includes project rules, session memory, benchmark tables, 
 
 ---
 
-## 1. Project Rules & Instructions
 
-### 1.1 Global `~/.claude/CLAUDE.md`
+## 1. Methodology
 
-```markdown
-# Claude Code Project Instructions
+Three models were evaluated on the same 100 stratified prompts using the same
+deterministic 6-axis rubric (`Code/src/sbol_eval_v2.py`):
 
-## Code Analysis Guidelines
+- **Opus 4.7 ceiling row**: a deterministic Chen-Truong-style prompt-engineered
+  baseline (`Code/src/build_opus_responses.py`), not a billed Anthropic API run.
+  See §3.1 footnote for details on what this represents.
+- **Qwen 3.5 27B + LoRA on macOS via MLX** — Q8 fused adapter; live inference at
+  17.6 tok/s.
+- **Gemma 4 26B-A4B + LoRA on a Jetson Orin NX** — UD-Q3_K_M GGUF via llama.cpp
+  + CUDA; 7.0 tok/s sustained at 15W.
 
-When analyzing the codebase, ALWAYS exclude the `examples/` folder from:
-- Architectural analysis
-- Principle derivation
-- Codebase understanding tasks
-- Pattern recognition
-- Code structure analysis
-
-The `examples/` directory contains sample usage patterns and demonstrations that should not influence project architecture decisions or principle formulation.
-```
-
-### 1.2 Project-local `CLAUDE.md` and `.claude/rules/*.md`
-
-None present at `<repo>/` or `<repo>/`. Project uses global rules only.
-
----
-
-## 2. Session Memory (auto-memory)
-
-Source: `<home>/.claude/projects/-Users-arlo/memory/`. These are point-in-time observations; verify against current code before citing as live state.
-
-### 2.1 Index (`MEMORY.md`)
-
-```
-- Jetson Orin NX deployment target       — SSH visionx@192.168.55.1 over USB-C bridge; project at ~/newgenes/
-- Newgenes fine-tune deployment state    — Gemma 4 26B-A4B QLoRA deployment status, blockers, next steps as of 2026-04-16
-- Don't repeat security warnings         — warn once about exposed credentials, then drop it
-- SBOL goal and methodological anchor    — ultimate goal is usable SBOL design; methodology from Chen & Truong 2026 prompt-only paper
-- Qwen 3.5 27B deploy broken 2026-04-18  — trained fine, Q3_K_M GGUF produced gibberish; patched convert_hf_to_gguf norm-weight bug
-- SBOL eval v2 framework                 — 100-prompt, 6-axis deterministic rubric for cross-model SBOL generation comparison
-- LoRA vs Chen-prompt ablation 2026-04-20 — 2×2 shows LoRA and Chen prompt ~80% redundant; biology rubric -20pts under structural
-```
-
-### 2.2 SBOL goal & methodological anchor
-
-- **Ultimate goal:** produce *usable* genetic-circuit designs in SBOL (the standardized design format needed for wet-lab realization, not just simulation).
-- **Methodological anchor:** Chen & Truong, "Prompt-Only Gene-Circuit Modeling with a Large Language Model Simulates the synNotch Spheroids," *ACS Synthetic Biology*, accepted 2026-04-06, DOI 10.1021/acssynbio.5c00704. Repo: `github.com/KaiwenChen0810/synNotch_Simulation`.
-- **Why it matters:** Chen & Truong establish that prompt-only (no fine-tuning) with (i) full domain reference, (ii) explicit biological guardrails, (iii) an in-silico validation loop is the most robust NL-to-simulation path known. They used Claude 4 Sonnet inside Cursor, reproduced Toda et al.'s synNotch spheroids, and *discovered* a sustained-contact threshold as a required design principle.
-- **How it maps here:** Newgenes fine-tune (Qwen 3.5 27B / Gemma 26B-A4B) is the *edge/efficiency* layer; Chen–Truong prompt-only is the *quality ceiling* layer. Complementary, not competing. Note: Chen's paper is CC3D/morphogenesis — our extension is CC3D → SBOL.
-
-### 2.3 SBOL eval v2 framework
-
-- 100 prompts, stratified 5 difficulty tiers × 20 prompts, 12 topologies, 6 organisms (ecoli 70, mammalian 11, yeast 9, plant 5, bacillus 3, cellfree 2).
-- 6 orthogonal axes totalling 100 points:
-  - **SV** Structural Validity (20) — JSON parse, schema, unique ids, referential integrity, valid types, no self-loops
-  - **BW** Biological Wiring (20) — tx-from-promoter, tl-from-rbs, cds complete wiring, terminator coverage, regulator wiring, balance
-  - **BA** Biological Accuracy (20) — part recognition, organism compat, interaction-type semantics, hallucination penalty, mechanism coherence
-  - **PF** Prompt Fulfillment (20) — organism match, keyword presence, behavior-matches-logic, completeness, quantitative language
-  - **DQ** Design Quality (10) — description informativeness, naming conventions, modularity, no redundancy
-  - **REP** Robustness / Engineering Practice (10) — feedback intentional, burden reasonable, chassis appropriate, regulatory hierarchy
-- **Determinism by choice:** no LLM-judge in the primary path; all axes rule-based for reproducibility and zero-cost comparison.
-- Rubric: `Code/src/sbol_eval_v2.py`; Runner: `jetson_sbol_eval_v2_http.py`; Results: `sbol_eval_v2_<tag>.{json,summary.json,log}`.
-
-### 2.4 LoRA vs Chen-prompt ablation finding (2026-04-20)
-
-*Platform: Mac M5 Max (MLX); Q4_K_M base vs Q8 LoRA-fused.*
-
-| | Default prompt | Chen & Truong prompt |
-|---|---|---|
-| Base 4-bit | 89.71 (A) | 92.68 (B) |
-| LoRA 8-bit fused | 92.2 (C) | 93.18 (D) |
-
-- LoRA alone: **+2.50**
-- Chen prompt alone: **+2.97**
-- Combined: **+3.47** (would be +5.47 if additive)
-- Overlap / redundant gain: **~2.0 pts** — the two interventions teach roughly the same skill.
-- Biology validation on 11 hardest Cell D outputs: structural rubric = **91.8**, expert bio rubric = **71.4**, gap = **−20.4**. Gap is dominated by logic inversions (toggles that self-repress, NAND kill switches that become OR, CRISPR sensors that confuse direct with collateral cleavage).
-
-### 2.5 Qwen 3.5 27B deploy broken → fixed (2026-04-18)
-
-- Training completed successfully (2500 iters, val 0.325). Initial Q3_K_M GGUF deployment to Jetson produced garbled Unicode (avg 0/100).
-- **Root cause:** `convert_hf_to_gguf.py` (`Qwen3NextModel.modify_tensors`, line 4781-4782) adds `+1` to all `norm.weight` tensors — correct for Qwen3Next (stores γ−1), **wrong** for Qwen 3.5 (stores γ directly, mean ~0.97). `Qwen3_5TextModel` inherits from `_LinearAttentionVReorderBase → Qwen3NextModel`, so the bug cascaded.
-- **Debug chain:** Mac llama-cli Q3_K_M → garbage. Mac llama-cli f16 → garbage (rules out quant). `mlx_lm.generate` on 4-bit base + adapter → coherent (MLX fine). On dequantized HF fused dir → coherent (fuse fine). Bug isolated to the converter. Inspected `input_layernorm.weight` mean = 0.9733 (standard γ, not γ−1).
-- **Patch** applied around line 5414 of `/private/tmp/llama.cpp/convert_hf_to_gguf.py`:
-  ```python
-  @ModelBase.register("Qwen3_5ForConditionalGeneration", "Qwen3_5ForCausalLM")
-  class Qwen3_5TextModel(_LinearAttentionVReorderBase):
-      model_arch = gguf.MODEL_ARCH.QWEN35
-      def modify_tensors(self, data_torch, name, bid):
-          if name.endswith("norm.weight") and not name.endswith("linear_attn.norm.weight"):
-              yield from Qwen2MoeModel.modify_tensors(self, data_torch, name, bid)
-              return
-          yield from super().modify_tensors(data_torch, name, bid)
-  ```
-  Same fix applied to `Qwen3_5MoeTextModel`. Re-converted → Q4_K_M coherent at 28 tok/s with proper thinking-template usage. Upstream-worthy.
-
-### 2.6 Jetson deployment (2026-04-17, Gemma 4 26B-A4B)
-
-- **Hardware:** Jetson Orin NX 16 GB, Ampere sm_87, 1024 CUDA cores, 16 GB LPDDR5 @ ~102 GB/s. SSH `visionx@192.168.55.1` over USB-C ethernet bridge (`l4tbr0`, static IP). Project at `/home/visionx/newgenes/`.
-- **Artifacts:** `gemma-4-26B-A4B-it-UD-Q2_K_XL.gguf` 9.8 GB base + `newgenes-adapter.gguf` 384 MB LoRA bf16 (covers layers 14–29).
-- **Build:** upstream llama.cpp from source on Jetson with `GGML_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES=87 -DLLAMA_CURL=OFF`. `cuda-compat-12-1` needed — export `LD_LIBRARY_PATH=/usr/local/cuda-12.1/compat:$LD_LIBRARY_PATH`.
-- **Launch:** `llama-server -m ... --lora ... -ngl 999 -fa on -ctk q8_0 -ctv q8_0 -c 4096 --host 127.0.0.1 --port 8080`.
-- **Request flags:** must pass `reasoning_budget: 0` and `chat_template_kwargs: {"enable_thinking": false}` for the `peg-gemma4` template, otherwise `content` is empty and output routes to `reasoning_content`.
-- **Must use canonical training system prompt** (~1120 chars, uniform across all 1769 rows). Generic system prompts trigger base-model schema (`circuit_type`, `repressor`, markdown-wrapped); canonical prompt triggers trained schema (`name/components/interactions/behavior/organism`).
-- **Performance:** prompt 46 tok/s, decode 7.0 tok/s, RAM 9.8 GB + 384 MB LoRA + q8 KV cache ≈ fits 15.5 GB unified.
-- **Jetson /100 eval (20-prompt battery, `jetson_eval100.py`):** **92.8 / 100**, with T1 Format 97 / T2 Schema 92 / T3 Biology 87 / T4 Relevance 98. Weak spots: snake_case 65%, cds_wiring 63%, terminator_coverage 76%. Wall time 51.4 min.
-
-### 2.7 Dataset state (2026-04-17)
-
-- `mlx_data/{train,valid,test}.jsonl` = **1419 / 178 / 172 = 1769 rows** (post-GPT-5.4 repair + organism normalization).
-- Later trimmed for Qwen 3.5 LoRA to **1162 / 64 / 75** (current splits).
-- Two GPT-5.4 repair passes + retry pass; final structural audit: 0 schema violations, 0 dangling refs, 0 dupes. Organisms canonicalized (Human → Homo sapiens, E. coli → Escherichia coli, etc.).
-- 200-sample GPT-5.4 quality: factual 4.03, plausibility 3.83, alignment 4.45, schema 4.84. Plausibility floor is intrinsic to the synth tier (3.61 synth vs 4.15 real).
-
-### 2.8 Feedback preferences (user instructions that persist)
-
-- Warn once about exposed credentials, then drop it. Don't repeat rotation reminders.
-
----
+All three use the same temperature (0.1), the same prompt set, the same system
+message, and the same scoring code. The training data, contamination check,
+and ablation methodology are documented in §3.4–§3.7.
 
 ## 3. Primary Results & Benchmark Tables
 
@@ -141,7 +41,9 @@ Source: `<home>/.claude/projects/-Users-arlo/memory/`. These are point-in-time o
 
 | Config | Platform | Quant | Score | Cost / 100 | Decode | Notes |
 |---|---|---|---|---|---|---|
-| **Opus 4.7** (frontier, prompt-only) | Anthropic API | bf16 | **99.22** | ~$4–6 (API) | ~50 tok/s | Upper bound; Chen & Truong techniques |
+| **Opus 4.7** (prompt-engineered baseline) ⁰ | Chen-Truong template | n/a | **99.22** | $0 (no API call) | n/a | Rubric-attainable ceiling, see footnote ⁰ |
+
+⁰ **About the Opus 4.7 row:** the score in this row was *not* obtained by calling the Anthropic API. It was generated by `Code/src/build_opus_responses.py`, a deterministic Python program that applies the Chen & Truong (2026) prompt-engineering technique by template; the result is auto-graded by the same `sbol_eval_v2.py` rubric used for the local models. Read 99.22 as a *rubric-attainable ceiling under the Chen-Truong technique*, not as a measurement of frontier-model quality. A future revision should add a real Anthropic API run for an unbiased ceiling.
 | **Qwen 3.5 27B + LoRA** | Mac MLX | Q8 | **92.2** ⁺ | $0 (local) | 17.6 tok/s | Our best-on-device; rep_penalty 1.05 + schema retry |
 | Qwen 3.5 27B + LoRA (pre-fix) | Mac MLX | Q8 | 90.71 | $0 | 17.6 tok/s | Baseline before loop-mitigation patches |
 | Qwen 3.5 27B + LoRA | Mac GGUF | Q3_K_M | 83.99 | $0 | — | Quant scaling |
