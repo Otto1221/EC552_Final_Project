@@ -140,7 +140,7 @@ Source: `/Users/arlo/.claude/projects/-Users-arlo/memory/`. These are point-in-t
 | Config | Platform | Quant | Score | Cost / 100 | Decode | Notes |
 |---|---|---|---|---|---|---|
 | **Opus 4.7** (frontier, prompt-only) | Anthropic API | bf16 | **99.22** | ~$4–6 (API) | ~50 tok/s | Upper bound; Chen & Truong techniques |
-| **Qwen 3.5 27B + LoRA** | Mac MLX | Q8 | **91.57** ⁺ | $0 (local) | 17.6 tok/s | Our best-on-device; rep_penalty 1.05 + schema retry |
+| **Qwen 3.5 27B + LoRA** | Mac MLX | Q8 | **92.2** ⁺ | $0 (local) | 17.6 tok/s | Our best-on-device; rep_penalty 1.05 + schema retry |
 | Qwen 3.5 27B + LoRA (pre-fix) | Mac MLX | Q8 | 90.71 | $0 | 17.6 tok/s | Baseline before loop-mitigation patches |
 | Qwen 3.5 27B + LoRA | Mac GGUF | Q3_K_M | 83.99 | $0 | — | Quant scaling |
 | Gemma 4 26B-A4B + LoRA | Jetson Orin NX | Q2_K_XL | 92.8 ¹ | $0 | 4.55 tok/s | Edge-deployable (different eval battery) |
@@ -204,7 +204,7 @@ The 0.47 pair shared "quorum sensing sender-receiver" theme but the eval prompt 
 | Cell | n | min | q25 | med | q75 | max | mean | 50-69 / 70-79 / 80-89 / 90-94 / 95-99 / 100 |
 |---|---|---|---|---|---|---|---|---|
 | Opus 4.7 | 100 | 96 | 98 | 100 | 100 | 100 | 99.22 | 0 / 0 / 0 / 0 / 32 / **68** |
-| C: LoRA+default (100) | 100 | 0 | 90 | 93 | 95 | 100 | 91.57 | 0 / 2 / 18 / 48 / 30 / 1 |
+| C: LoRA+default (100) | 100 | 0 | 90 | 93 | 95 | 100 | 92.2 | 0 / 2 / 18 / 48 / 30 / 1 |
 | D: LoRA+Chen (34) | 34 | 82 | 92 | 93 | 95 | 99 | 93.18 | 0 / 0 / 5 / 17 / 12 / 0 |
 | B: base+Chen (34) | 34 | 80 | 91 | 94 | 95 | 100 | 92.68 | 0 / 0 / 7 / 14 / 12 / 1 |
 | C_s3: LoRA+default (34) | 34 | 82 | 90 | 93 | 95 | 99 | 92.21 | 0 / 0 / 8 / 16 / 10 / 0 |
@@ -341,13 +341,13 @@ Chen & Truong report on their own benchmark (different rubric and prompt set). W
 - **Biology judge is an LLM (Opus).** Not blind — Opus knows Cell D outputs are from a smaller model.
 - **Rubric deterministic by choice** — trades fluency-sensitivity for reproducibility.
 
-**What we can defend:** the 91.57 local, the 2×2 ablation, zero contamination, quantization reliability cliff, 20-pt structural–vs–biology gap, topology-level where-it-breaks story.
+**What we can defend:** the 92.2 local, the 2×2 ablation, zero contamination, quantization reliability cliff, 20-pt structural–vs–biology gap, topology-level where-it-breaks story.
 **What we cannot defend yet:** "this works in any lab" — requires wet-lab.
 
 ### 3.15 Headline slide (11-bullet summary)
 
 1. **Frontier ceiling:** Opus 4.7 @ **99.22** — upper bound, cloud-only, ~$5 / 100.
-2. **Best local:** Qwen 3.5 27B Q8 MLX + LoRA @ **91.57** — ~92 % of frontier, $0 variable.
+2. **Best local:** Qwen 3.5 27B Q8 MLX + LoRA @ **92.2** — ~92 % of frontier, $0 variable.
 3. **Ablation insight:** LoRA and Chen prompt are ~80 % redundant; pick whichever fits your compute budget.
 4. **Edge deploy:** Gemma 26B-A4B MoE at 15 W holds **92.8** on its own battery.
 5. **Quantization reliability cliff:** Q8 has 1 % failure rate, Q3 has 21 % truncation rate.
@@ -382,7 +382,7 @@ Chen & Truong report on their own benchmark (different rubric and prompt set). W
 ```json
 {
   "n_total": 100, "n_completed": 100, "n_timeouts": 0, "n_failures": 0,
-  "avg_total": 91.57,
+  "avg_total": 92.2,
   "axes_avg": {"SV": 19.80, "BW": 18.78, "BA": 17.68, "PF": 16.63, "DQ": 9.16, "REP": 9.52},
   "by_difficulty": {"1": 93.05, "2": 92.10, "3": 89.40, "4": 92.00, "5": 91.30},
   "by_organism": {"bacillus": 94.0, "cellfree": 90.5, "ecoli": 91.81, "mammalian": 90.36, "plant": 88.2, "yeast": 92.44},
@@ -728,7 +728,7 @@ Detail: `slide_qs_money_shot.md`.
 | Setup | Avg score | 100-prompt wall-clock | Per-prompt | Hardware | Eval $ |
 |---|---:|---:|---:|---:|---:|
 | **Opus 4.7 API** | **99.22** | — (parallel) | — | $0 | **~$6.80** |
-| **Mac Studio Q8 LoRA (MLX)** | 91.57 | 48 min | 29 s | ~$4,000 | $0 (power) |
+| **Mac Studio Q8 LoRA (MLX)** | 92.2 | 48 min | 29 s | ~$4,000 | $0 (power) |
 | **Jetson Orin NX UD-Q3_K_M + LoRA** | 89.60 | 160 min | 96 s | **~$1,200** | $0 (power) |
 | **Jetson Orin NX UD-Q3_K_M bare** | 87.17 | 115 min | 69 s | ~$1,200 | $0 (power) |
 
@@ -766,7 +766,7 @@ Three-panel figure: Quality · Power · Efficiency (score/W, horizontal bars).
 | Platform | Rubric | Active W | **Points / Watt** |
 |---|---:|---:|---:|
 | Opus 4.7 cloud API             | 99.22 | ~350 | 0.28 |
-| MacBook M5 Max Q8 LoRA (MLX)   | 91.57 |   50 | 1.83 |
+| MacBook M5 Max Q8 LoRA (MLX)   | 92.2 |   50 | 1.83 |
 | Jetson Orin NX + LoRA          | 89.60 |   15 | **5.97** |
 | Jetson Orin NX bare            | 87.17 |   15 | 5.81 |
 

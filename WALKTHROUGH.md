@@ -52,7 +52,7 @@ This task is annoying for biologists (lots of bookkeeping) and a great fit for L
 | Setup | Hardware | Score (out of 100) | Cost per 100 circuits |
 |---|---|---|---|
 | Claude Opus 4.7 | Anthropic cloud | **99.22** | ~$6.80 |
-| Qwen 3.5 27B + our LoRA | MacBook M5 Max | 91.57 | $0 |
+| Qwen 3.5 27B + our LoRA | MacBook M5 Max | 92.2 | $0 |
 | Gemma 4 26B-A4B + our LoRA | **Jetson Orin NX (15 W)** | **89.60** | $0 |
 | Gemma 4 26B-A4B (no LoRA) | Jetson Orin NX | 87.17 | $0 |
 

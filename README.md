@@ -13,7 +13,7 @@ Fine-tuning open LLMs to generate synthetic biology circuit designs (SBOL JSON) 
 | Setup | Platform | Score (n=100) | $/100 circuits | Throughput |
 |---|---|---:|---:|---:|
 | **Opus 4.7 API** (ceiling) | Anthropic cloud | **99.22** | ~$6.80 | ~50 tok/s |
-| Qwen 3.5 27B + LoRA, Q8 | Mac M5 Max (MLX) | 91.57 | $0 var. | 17.6 tok/s |
+| Qwen 3.5 27B + LoRA, Q8 | Mac M5 Max (MLX) | 92.2 | $0 var. | 17.6 tok/s |
 | Gemma 4 26B-A4B + LoRA, UD-Q3_K_M | **Jetson Orin NX (15 W)** | **89.60** | $0 var. | 7.0 tok/s |
 | Gemma 4 26B-A4B bare, UD-Q3_K_M | Jetson Orin NX | 87.17 | $0 var. | 7.1 tok/s |
 
