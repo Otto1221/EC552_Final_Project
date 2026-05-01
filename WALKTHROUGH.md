@@ -139,7 +139,7 @@ You need an OpenAI-compatible endpoint. Easiest options:
 Start your endpoint on `localhost:8080`, then:
 
 ```bash
-# This sends all 100 evaluation prompts and writes results/sbol_eval_v2_<tag>.json
+# This sends all 100 evaluation prompts and writes Code/results/sbol_eval_v2_<tag>.json
 LLAMA_URL=http://localhost:8080/v1/chat/completions \
     python3 Code/src/jetson_sbol_eval_v2_http.py mymodel_v1
 ```
@@ -200,7 +200,7 @@ python3 llama.cpp/convert_hf_to_gguf.py ./Qwen3.5-27B-merged --outtype f16
 ./llama.cpp/build/bin/llama-quantize Qwen3.5-27B.gguf Qwen3.5-27B-Q3_K_M.gguf Q3_K_M
 
 # 3. SCP to Jetson
-scp Qwen3.5-27B-Q3_K_M.gguf visionx@192.168.55.1:~/models/
+scp Qwen3.5-27B-Q3_K_M.gguf <jetson-user>@<jetson-ip>:~/models/
 
 # 4. On Jetson, start llama-server
 ./llama.cpp/build/bin/llama-server \

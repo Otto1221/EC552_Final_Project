@@ -23,7 +23,7 @@ Full prompt text in `demo_prompts.json`.
 
 ```bash
 # 1. On Jetson — start llama-server with LoRA hot-loaded
-cd /home/visionx/newgenes
+cd <jetson-repo>
 ./bin/llama-server \
   --model models/gemma-4-4b-it-UD-Q3_K_M.gguf \
   --lora models/gemma4-lora-fp16.gguf \
@@ -31,7 +31,7 @@ cd /home/visionx/newgenes
   --host 0.0.0.0 --port 8080 &
 
 # 2. From Mac — tunnel + run the demo set
-ssh -L 18080:localhost:8080 visionx@192.168.55.1 -N &
+ssh -L 18080:localhost:8080 <jetson-user>@<jetson-ip> -N &
 cd <repo>
 python3 run_demo_prompts.py --url http://localhost:18080 --out demo_results.json
 

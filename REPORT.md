@@ -564,9 +564,9 @@ All paths under `<repo>/` unless noted.
 - `mlx_data/{train,valid,test}.jsonl.bak.gpt_repair_20260417_*` — backup of earlier 1419/178/172 splits
 
 ### 9.5 Deployment artifacts (Jetson)
-- `/home/visionx/newgenes/gemma-4-26B-A4B-it-UD-Q2_K_XL.gguf` — base 9.8 GB
-- `/home/visionx/newgenes/newgenes-adapter.gguf` — LoRA 384 MB bf16
-- `/home/visionx/newgenes/Modelfile.lora`
+- `<jetson-repo>/gemma-4-26B-A4B-it-UD-Q2_K_XL.gguf` — base 9.8 GB
+- `<jetson-repo>/newgenes-adapter.gguf` — LoRA 384 MB bf16
+- `<jetson-repo>/Modelfile.lora`
 
 ### 9.6 Deployment artifacts (Mac)
 - `qwen35-27b-newgenes-fix-f16.gguf` — 50 GB (patched converter, correct)
