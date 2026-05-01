@@ -158,7 +158,7 @@ Requires:
 
 ```bash
 # 1. Download the base model from HuggingFace
-huggingface-cli download Qwen/Qwen3.5-27B-Instruct --local-dir ./Qwen3.5-27B
+huggingface-cli download Qwen/Qwen3.5-27B --local-dir ./Qwen3.5-27B   # base model (no -Instruct suffix)
 
 # 2. Convert to MLX format
 mlx_lm.convert --hf-path ./Qwen3.5-27B --mlx-path ./Qwen3.5-27B-mlx -q  # -q = quantize to 4-bit
@@ -175,6 +175,18 @@ mlx_lm.generate \
 ```
 
 The training data is in `Code/data/train.jsonl` (1,162 rows). You can edit it, add your own examples, retrain.
+
+### Tier 3.5: Fuse the LoRA into the base model
+
+```bash
+# After training finishes (Tier 3 above), fuse the adapter into a single model
+mlx_lm.fuse \
+  --model ./Qwen3.5-27B-mlx \
+  --adapter-path ./adapters/qwen35-27b-newgenes \
+  --save-path ./Qwen3.5-27B-merged
+
+# This produces ./Qwen3.5-27B-merged/ which is what the GGUF conversion below uses.
+```
 
 ### Tier 4: Deploy to a Jetson edge device
 

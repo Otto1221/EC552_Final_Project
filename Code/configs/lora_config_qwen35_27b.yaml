@@ -3,9 +3,9 @@
 # Training target: M5 Max 64GB with iogpu.wired_limit_mb=57344 (56 GB Metal budget).
 # Deployment target: Jetson Orin NX 16GB via Q3_K_M GGUF.
 # To override base model: edit this file or pass --model on command line
-model: "mlx-community/Qwen3.5-27B-Instruct-4bit"
+model: "mlx-community/Qwen3.5-27B-4bit"  # corrected: no -Instruct suffix exists on HF
 train: true
-data: "./mlx_data"
+data: "Code/data/mlx_data"  # path matches Code/src/prepare_mlx.py output (run from repo root)
 seed: 42
 # 64 total layers; 16 targets the last 16 (captures last 4 full-attn + 12 linear-attn blocks).
 lora_layers: 16

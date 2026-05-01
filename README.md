@@ -64,7 +64,7 @@ Scripts in `Code/src/` read from `../Code/data/` and write to `../results/` (or 
 ```
 
 **Not in the repo** (too large or licensed elsewhere):
-- Base model weights — download from HuggingFace (`Qwen/Qwen3.5-27B-Instruct`, `google/gemma-4-26b-a4b-it`).
+- Base model weights — download from HuggingFace (`Qwen/Qwen3.5-27B`, `google/gemma-4-26b-a4b-it`).
 - Quantized GGUFs — rebuilt via `llama.cpp` convert scripts; see `REPORT.md` §8.
 - Trained LoRA adapter — ~384 MB, available on request.
 - Opus API keys — set `ANTHROPIC_API_KEY` in your environment.
@@ -82,10 +82,24 @@ Run every command from the repo root. The scripts resolve `../Code/data/` and `.
 python3 Code/src/sbol_eval_v2.py --input Code/results/sbol_eval_v2_gemma_udq3km_lora.json --summary
 ```
 
+### Run a single demo prompt (live streaming)
+
+```bash
+# Mac (MLX server):
+mlx_lm.server --model /path/to/Qwen3.5-27B-8bit-lora --port 8080 &
+python3 Code/src/demo_stream.py "Constitutive GFP reporter in E. coli"
+
+# Jetson (llama-server):
+~/newgenes/start_gemma_server.sh   # or your equivalent launch script
+python3 Code/src/demo_stream.py 0  # or 0–9 for bundled demo prompts
+```
+
+`demo_stream.py` streams tokens, validates the JSON, scores against the rubric, emits SBOL3 RDF/XML, and saves the output to `~/Desktop/demo_last.{txt,xml}`. Set `DEMO_DIFF=1..5` and `DEMO_TOPO=reporter|toggle|...` for custom prompts.
+
 ### Run the 100-prompt eval against a local llama-server
 ```bash
 # Start llama-server with your model + optional LoRA adapter
-./llama-server --model <model.gguf> --lora <adapter.gguf> --port 8080
+./llama.cpp/build/bin/llama-server --model <model.gguf> --lora <adapter.gguf> --port 8080
 
 # Run eval (writes Code/results/sbol_eval_v2_<tag>.json + .summary.json)
 LLAMA_URL=http://localhost:8080/v1/chat/completions python3 Code/src/jetson_sbol_eval_v2_http.py <tag>

@@ -84,9 +84,10 @@ def stream_chat(messages):
                 sys.stdout.flush()
                 chunks.append(tok)
     except urllib.error.URLError as e:
-        sys.exit(f"\n\033[1;31m✗ MLX server unreachable at {URL}\033[0m\n"
+        sys.exit(f"\n\033[1;31m✗ Model server unreachable at {URL}\033[0m\n"
                  f"  reason: {e.reason}\n"
-                 f"  start with: mlx_lm.server --model {MODEL_PATH} --port 8080")
+                 f"  Mac:    mlx_lm.server --model /path/to/Qwen3.5-27B-8bit-lora --port 8080\n"
+                 f"  Jetson: ~/newgenes/start_gemma_server.sh  (or any llama-server on :8080)")
     dt = time.time() - t0
     full = "".join(chunks)
     ntok = len(chunks)
